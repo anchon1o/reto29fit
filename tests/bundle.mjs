@@ -1,0 +1,37 @@
+// Prueba el HTML único dentro de un iframe sandbox SIN same-origin (localStorage bloqueado).
+import { chromium, devices } from 'playwright'; import fs from 'fs';
+const html = fs.readFileSync(new URL('../dist/reto29-demo.html', import.meta.url), 'utf8');
+let fallos = 0; const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); if (!c) fallos++; };
+const b = await chromium.launch(); const ctx = await b.newContext({ ...devices['iPhone 13'] }); const page = await ctx.newPage();
+const errores = []; page.on('pageerror', (e) => errores.push(e.message)); page.on('console', (m) => { if (m.type() === 'error' && !/font|ERR_|Failed to load/.test(m.text())) errores.push(m.text()); });
+await page.setContent(`<body style="margin:0"><iframe sandbox="allow-scripts allow-forms" style="border:0;width:100vw;height:100vh"></iframe></body>`);
+await page.evaluate((h) => { document.querySelector('iframe').srcdoc = h; }, html);
+const f = page.frameLocator('iframe');
+await f.locator('input[name=codigo]').fill('demo'); await f.locator('button.cta').click();
+await f.locator('.nombre', { hasText: /^Ancho$/ }).click(); await f.locator('.prog').waitFor();
+ok(true, 'arranca con localStorage bloqueado');
+await f.locator('[data-act="demo-sembrar"]').click(); await f.locator('.fila .mini').first().waitFor();
+const n = +(await f.locator('.prog-n b').innerText()); ok(n >= 18, `ejemplos sembrados: Ancho ${n}/29`);
+await page.screenshot({ path: 'capturas_inicio.png' });
+await f.locator('.nav a[href="/matriz"]').click(); await f.locator('.mx').waitFor();
+await page.screenshot({ path: 'capturas_matriz.png' });
+// la siembra incluye una foto de grupo de 3 (yo + 2 otros): comprobamos el detalle
+await f.locator('.nav a[href="/mi-reto"]').click(); await f.locator('.tile.hecho').first().click();
+await f.locator('.det-foto img').waitFor();
+console.log('  detalle grupo demo:', (await f.locator('.det-n').innerText()).replace(/\s+/g, ' '));
+await f.locator('[data-act=atras]').click(); await f.locator('.grid-reto').waitFor();
+await f.locator('.tile:not(.hecho)').first().click();
+await f.locator('select[data-ch="nuevo-b"]').waitFor();
+const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP8z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==', 'base64');
+await f.locator('input[type=file]:not([capture])').first().setInputFiles({ name: 'f.png', mimeType: 'image/png', buffer: png });
+await f.locator('.foto-prev img').waitFor(); await f.locator('button.cta').click(); await f.locator('.det-foto img').waitFor();
+ok(true, 'alta con foto dentro del iframe');
+await f.locator('[data-act=atras]').click(); await f.locator('.grid-reto').waitFor(); ok(true, 'botón atrás con router en memoria');
+await f.locator('.chip-yo').click(); await f.locator('a[href="/admin"]').click();
+await f.locator('input[name=password]').fill('demo'); await f.locator('button.cta').click(); await f.locator('.tabs').waitFor();
+ok(true, 'login admin sin email, solo contraseña');
+await f.locator('.adm-fila a.btn').first().click(); await f.locator('[data-act="adm-borrar-enc"]').click();
+await f.locator('.modal [data-r="1"]').click(); await f.locator('.tabs').waitFor();
+ok(true, 'admin borra con confirmación propia dentro del iframe');
+ok(!errores.length, 'sin errores JS' + (errores.length ? ': ' + errores.join(' | ') : ''));
+await b.close(); console.log(fallos ? `${fallos} FALLOS` : 'BUNDLE OK'); process.exit(fallos ? 1 : 0);

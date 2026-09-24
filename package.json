@@ -1,0 +1,13 @@
+{
+  "name": "reto29-fit2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/logica.test.mjs && node tests/e2e.mjs",
+    "bundle": "node tools/bundle.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^0.27.0",
+    "@vercel/postgres": "^0.10.0"
+  }
+}

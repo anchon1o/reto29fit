@@ -1,0 +1,3 @@
+{ "name": "RETO 29 · FIT 2026", "short_name": "RETO 29", "start_url": "/", "display": "standalone",
+  "background_color": "#3b90cc", "theme_color": "#3b90cc",
+  "icons": [ { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" } ] }

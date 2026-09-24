@@ -1,0 +1,13 @@
+import { chromium, devices } from 'playwright';
+const b = await chromium.launch(); const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage();
+await p.goto('http://localhost:5173'); await p.waitForSelector('input[name=codigo]'); await p.fill('input[name=codigo]', 'demo'); await p.click('button.cta');
+await p.waitForSelector('.nombre'); await p.locator('.nombre', { hasText: /^Ancho$/ }).click(); await p.waitForSelector('.prog');
+await p.goto('http://localhost:5173/nuevo'); await p.waitForSelector('select[data-ch="nuevo-b"]');
+await p.selectOption('select[data-ch="nuevo-b"]', { label: 'Gala' });
+const b64 = await p.evaluate(async () => { const c = document.createElement('canvas'); c.width=400;c.height=400; const g=c.getContext('2d'); g.fillStyle='#456'; g.fillRect(0,0,400,400); return c.toDataURL('image/jpeg',0.9).split(',')[1]; });
+const fs = await import('fs'); fs.writeFileSync('/tmp/s.jpg', Buffer.from(b64,'base64'));
+await p.locator('input[type=file]:not([capture])').first().setInputFiles('/tmp/s.jpg'); await p.waitForSelector('.foto-prev img');
+await p.click('button.cta'); await p.waitForURL(/\/encuentro\//);
+console.log('fontStyle .det-n i:', await p.evaluate(() => getComputedStyle(document.querySelector('.det-n i')).fontStyle));
+await p.screenshot({ path: 'capturas_cursiva.png' });
+await b.close();

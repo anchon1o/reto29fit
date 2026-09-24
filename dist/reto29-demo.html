@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>RETO 29 · FIT 2026 (demo)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>/* RETO 29 · FIT 2026 — móvil primero. Colores medidos del cartel FIT: azul #3b90cc, amarillo #f7f074. */
+:root {
+  --azul: #3b90cc;          /* fondo del cartel */
+  --azul-hondo: #2c79b3;    /* superficies apoyadas sobre el fondo */
+  --azul-raya: rgba(255,255,255,.28);
+  --amarillo: #f7f074;      /* logotipo f!t */
+  --tinta: #0f3350;         /* texto sobre amarillo/blanco */
+  --blanco: #fff;
+  --rojo: #ffd9d2;
+  --nav-h: 62px; --top-h: 54px;
+  --fuente: "Fredoka", ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--azul); }
+body { margin: 0; font: 500 17px/1.35 var(--fuente); color: var(--blanco); background: var(--azul); min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+#app { max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; }
+a { color: inherit; }
+h1, h2, p, ol, ul { margin: 0; padding: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+img { display: block; max-width: 100%; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--blanco); outline-offset: 2px; }
+
+.boot { display: grid; place-items: center; min-height: 100dvh; font: 700 72px var(--fuente); color: var(--amarillo); }
+
+/* ---------- cabecera ---------- */
+.top { position: sticky; top: 0; z-index: 20; height: calc(var(--top-h) + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 14px 0; display: flex; align-items: center; justify-content: space-between; background: var(--azul); }
+.marca { display: flex; align-items: baseline; gap: 8px; text-decoration: none; min-height: 44px; align-items: center; }
+.marca b { font-size: 34px; line-height: 1; color: var(--amarillo); letter-spacing: -1px; }
+.marca span { font-weight: 600; font-size: 17px; }
+.chip-yo { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 22px; background: var(--azul-hondo); text-decoration: none; font-weight: 600; max-width: 55%; }
+.chip-yo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-yo svg { color: var(--amarillo); flex: none; }
+.sub-top h1 { font-size: 20px; font-weight: 700; color: var(--amarillo); text-transform: uppercase; letter-spacing: .3px; }
+.ic-btn { width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; padding: 0; text-decoration: none; font-size: 24px; }
+.ic-btn.txt { width: auto; font-size: 16px; text-decoration: underline; }
+
+/* ---------- página ---------- */
+.pag { padding: 6px 14px calc(var(--nav-h) + 22px + env(safe-area-inset-bottom)); }
+.h1 { font-size: 28px; font-weight: 700; color: var(--amarillo); text-transform: uppercase; line-height: 1.05; }
+.h2 { font-size: 17px; font-weight: 600; margin: 20px 0 8px; }
+.sub { margin: 6px 0 14px; font-size: 16px; opacity: .95; }
+.nota { font-size: 15px; opacity: .92; margin: 10px 0; }
+.centro { text-align: center; margin-top: 24px; }
+.vacio { padding: 16px; border: 2px dashed var(--azul-raya); border-radius: 14px; font-size: 16px; }
+.error { color: var(--tinta); background: var(--rojo); border-radius: 10px; padding: 10px 12px; font-size: 16px; margin: 8px 0; }
+.cargando { display: flex; gap: 10px; align-items: center; justify-content: center; padding: 30px 0; }
+.spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid currentColor; border-right-color: transparent; display: inline-block; animation: giro .7s linear infinite; vertical-align: -3px; }
+@keyframes giro { to { transform: rotate(360deg); } }
+
+/* ---------- botones ---------- */
+.cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 60px; padding: 0 16px; border: 0; border-radius: 16px; background: var(--amarillo); color: var(--tinta); font-weight: 700; font-size: 20px; letter-spacing: .2px; text-decoration: none; box-shadow: 0 4px 0 rgba(15,51,80,.35); }
+.cta:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(15,51,80,.35); }
+.cta[disabled] { opacity: .45; box-shadow: none; }
+.cta-2 { min-height: 52px; font-size: 18px; margin-bottom: 14px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--blanco); background: transparent; font-weight: 600; text-decoration: none; width: 100%; margin-top: 10px; }
+.btn-mini { width: auto; min-height: 44px; padding: 0 12px; font-size: 15px; margin: 0; border-width: 1.5px; flex: none; }
+.btn.peligro { border-color: var(--rojo); color: var(--rojo); }
+.enlace { display: inline-flex; align-items: center; min-height: 44px; background: none; border: 0; padding: 12px 6px; text-decoration: underline; font-weight: 600; color: var(--amarillo); }
+.seg { display: inline-flex; background: var(--azul-hondo); border-radius: 12px; padding: 3px; }
+.seg button { border: 0; background: none; min-height: 40px; padding: 0 14px; border-radius: 10px; font-weight: 600; font-size: 15px; }
+.seg button.on { background: var(--amarillo); color: var(--tinta); }
+.seg.ancho { display: flex; margin-bottom: 14px; } .seg.ancho button { flex: 1; padding: 0 6px; min-height: 44px; }
+
+/* ---------- inicio ---------- */
+.prog { padding: 4px 0 16px; }
+.prog-t { font-weight: 600; font-size: 17px; }
+.prog-n { color: var(--amarillo); font-weight: 700; line-height: .95; display: flex; align-items: baseline; gap: 8px; margin: 2px 0 10px; }
+.prog-n b { font-size: 84px; letter-spacing: -3px; } .prog-n i { font-style: normal; font-size: 38px; }
+.barra { height: 16px; border-radius: 8px; background: var(--azul-hondo); overflow: hidden; }
+.barra span { display: block; height: 100%; background: var(--amarillo); border-radius: 8px; min-width: 0; transition: width .5s ease; }
+.prog-s { margin-top: 8px; font-size: 16px; }
+.fila { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 4px; border-bottom: 1.5px solid var(--azul-raya); text-decoration: none; }
+.fila .mini, .aviso .mini { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: var(--azul-hondo); flex: none; }
+.fila-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fila-txt b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila-txt small { font-size: 14.5px; color: var(--amarillo); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fila > svg { flex: none; opacity: .8; }
+.fila-extras { margin-top: 14px; border: 0; background: var(--azul-hondo); border-radius: 14px; padding: 8px 12px; }
+.estrella { width: 44px; height: 44px; display: grid; place-items: center; color: var(--amarillo); flex: none; } .estrella svg { width: 30px; height: 30px; fill: currentColor; }
+
+/* ---------- entrada / quién ---------- */
+.entrada { padding: calc(28px + env(safe-area-inset-top)) 20px 30px; }
+.logo-xl { font: 700 96px/0.8 var(--fuente); color: var(--amarillo); letter-spacing: -4px; }
+.titulo-xl { font-size: 44px; font-weight: 700; color: var(--amarillo); margin-top: 14px; line-height: 1; }
+.grid-nombres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.nombre { min-height: 52px; border-radius: 12px; border: 2px solid var(--azul-raya); background: var(--azul-hondo); font-weight: 600; font-size: 16px; padding: 4px; line-height: 1.1; }
+.nombre.sel { background: var(--amarillo); color: var(--tinta); border-color: var(--amarillo); }
+.nombre.prov { border-style: dashed; } .nombre small { display: block; font-size: 11.5px; font-weight: 500; opacity: .9; }
+
+/* ---------- formularios ---------- */
+.form { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.campo { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.campo > span { font-weight: 600; font-size: 15.5px; } .campo em { font-style: normal; font-weight: 500; opacity: .8; font-size: 14px; }
+input[type=text], input[type=email], input[type=password], input[type=search], input[type=datetime-local], select {
+  width: 100%; min-height: 52px; padding: 0 12px; border-radius: 12px; border: 2px solid transparent; background: var(--blanco); color: var(--tinta); font-size: 17px; font-weight: 500; appearance: none; -webkit-appearance: none; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f3350' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 20px; padding-right: 34px; text-overflow: ellipsis; }
+input:focus, select:focus { outline: none; border-color: var(--amarillo); box-shadow: 0 0 0 3px rgba(247,240,116,.6); }
+input::placeholder { color: #6d8aa0; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.foto-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-foto { flex-direction: column; min-height: 104px; margin: 0; border: 2px dashed var(--blanco); border-radius: 16px; background: var(--azul-hondo); font-size: 17px; cursor: pointer; }
+.btn-foto svg { width: 36px; height: 36px; color: var(--amarillo); }
+.btn-foto:focus-within { outline: 3px solid var(--blanco); }
+.foto-vacia { min-height: 104px; display: flex; gap: 10px; align-items: center; justify-content: center; border-radius: 16px; background: var(--azul-hondo); }
+.foto-prev { position: relative; border-radius: 16px; overflow: hidden; background: var(--azul-hondo); }
+.foto-prev img { width: 100%; max-height: 46vh; object-fit: cover; }
+.foto-cambiar { position: absolute; right: 8px; bottom: 8px; background: rgba(15,51,80,.82); border-color: transparent; cursor: pointer; }
+.cuando { font-size: 16px; margin: -6px 0; }
+.aviso { display: flex; gap: 12px; align-items: center; background: var(--amarillo); color: var(--tinta); border-radius: 14px; padding: 10px 12px; font-size: 15.5px; }
+.aviso small { display: block; } .aviso a { font-weight: 600; display: inline-flex; align-items: center; min-height: 44px; }
+.pie-form { position: sticky; bottom: 0; padding: 10px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--azul) 22%); }
+
+/* ---------- mi reto ---------- */
+.reto-cab { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.reto-n { font-size: 24px; font-weight: 600; color: var(--amarillo); } .reto-n b { font-size: 40px; }
+.grid-reto { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tile { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; border: 2px dashed var(--azul-raya); display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; }
+.tile-mas { opacity: .85; } .tile-mas svg { width: 30px; height: 30px; }
+.tile-n { font-weight: 600; font-size: 15px; text-align: center; padding: 0 4px; line-height: 1.1; }
+.tile.hecho { border: 3px solid var(--amarillo); background: var(--amarillo); justify-content: flex-end; }
+.tile.hecho img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile.hecho .tile-n { position: relative; width: 100%; background: var(--amarillo); color: var(--tinta); padding: 3px 4px 2px; }
+.tick { position: absolute; top: 5px; right: 5px; width: 26px; height: 26px; border-radius: 50%; background: var(--amarillo); color: var(--tinta); display: grid; place-items: center; z-index: 1; }
+.tick svg { width: 17px; height: 17px; }
+
+/* ---------- matriz ---------- */
+.pag-mx { padding-left: 0; padding-right: 0; padding-bottom: 0; }
+.mx-barra, .leyenda { padding: 0 14px; }
+.mx-barra { display: flex; align-items: center; justify-content: space-between; }
+.leyenda { font-size: 14.5px; margin: 6px 0 8px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ley { width: 16px; height: 16px; border-radius: 4px; background: var(--azul-hondo); display: inline-block; margin-left: 4px; } .ley.on { background: var(--amarillo); margin-left: 0; }
+.mx-wrap { --c: 44px; --n0: 84px; --cab: 92px; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  height: calc(100vh - var(--top-h) - var(--nav-h) - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  height: calc(100dvh - var(--top-h) - var(--nav-h) - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+.mx { display: grid; grid-template-columns: var(--n0) repeat(var(--n), var(--c)); grid-auto-rows: var(--c); width: max-content; padding-bottom: 12px; }
+.mx { grid-template-rows: var(--cab); }
+.mx-esq, .mx-col { position: sticky; top: 0; z-index: 3; background: var(--azul); }
+.mx-esq { left: 0; z-index: 4; }
+.mx-col { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; border-bottom: 2px solid var(--azul-raya); }
+.mx-col span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 14.5px; font-weight: 600; white-space: nowrap; max-height: 84px; overflow: hidden; }
+.mx-fil { position: sticky; left: 0; z-index: 2; background: var(--azul); display: flex; align-items: center; padding: 0 6px 0 12px; font-size: 14.5px; font-weight: 600; line-height: 1.05; border-right: 2px solid var(--azul-raya); overflow: hidden; }
+.mx-col.yo, .mx-fil.yo { color: var(--amarillo); }
+.c { border: 0; padding: 0; margin: 2px; border-radius: 8px; background: var(--azul-hondo); }
+.c.mio { background: #246a9f; }
+.c.on { background: var(--amarillo); box-shadow: inset 0 -3px 0 rgba(15,51,80,.25); }
+.c.diag { background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,.22) 4px 6px); }
+.mx-wrap.mini { --c: calc((min(100vw, 480px) - 16px) / var(--n)); --n0: 0px; --cab: 0px; height: auto; padding: 0 8px 20px; overflow: hidden; }
+.mini .mx-esq, .mini .mx-col, .mini .mx-fil { visibility: hidden; padding: 0; border: 0; }
+.mini .c { margin: .6px; border-radius: 2px; box-shadow: none; }
+
+/* ---------- ranking ---------- */
+.rank { list-style: none; }
+.rank a { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 10px; border-bottom: 1.5px solid var(--azul-raya); text-decoration: none; font-size: 18px; }
+.puesto { width: 30px; font-weight: 700; color: var(--amarillo); text-align: right; }
+.rk-n { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-v { opacity: .95; } .rk-v b { font-size: 22px; font-weight: 700; }
+.rank li.yo a { background: var(--amarillo); color: var(--tinta); border-radius: 12px; border-color: transparent; } .rank li.yo .puesto { color: var(--tinta); }
+
+/* ---------- detalle ---------- */
+.det-n { font-size: 27px; font-weight: 700; line-height: 1.1; } .det-n .x { font-style: normal; color: var(--amarillo); }
+.det-c { color: var(--amarillo); font-weight: 600; margin: 2px 0 12px; }
+.det-foto { border-radius: 16px; overflow: hidden; background: var(--azul-hondo); margin-bottom: 10px; min-height: 120px; }
+.det-foto img { width: 100%; }
+.det-foto .btn { margin: 8px; }
+.det-l { display: flex; gap: 8px; align-items: center; font-weight: 600; margin: 12px 0 4px; } .det-l svg { color: var(--amarillo); flex: none; }
+.det-nota { margin: 8px 0; }
+.admin-acc { margin-top: 6px; }
+
+/* ---------- extras ---------- */
+.cromos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cromo { background: var(--blanco); color: var(--tinta); border-radius: 12px; padding: 6px 6px 8px; text-decoration: none; transform: rotate(-1.2deg); box-shadow: 0 3px 0 rgba(15,51,80,.3); }
+.cromo:nth-child(even) { transform: rotate(1deg); }
+.cromo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: #cfe3f2; }
+.cromo-n { display: block; font-weight: 700; font-size: 18px; margin-top: 5px; line-height: 1.1; } .cromo small { font-size: 13.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- navegación inferior ---------- */
+.nav { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; height: calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: var(--azul-hondo); border-top: 2px solid var(--azul-raya); }
+.nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; font-size: 13px; font-weight: 600; min-height: 48px; }
+.nav a.on { color: var(--amarillo); } .nav a.on svg { fill: rgba(247,240,116,.25); }
+
+/* ---------- toast ---------- */
+#toast { position: fixed; z-index: 50; left: 50%; bottom: calc(var(--nav-h) + 18px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: var(--tinta); color: var(--blanco); padding: 12px 18px; border-radius: 14px; font: 600 16px var(--fuente); opacity: 0; pointer-events: none; transition: .25s; width: max-content; max-width: calc(100vw - 32px); text-align: center; }
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- admin ---------- */
+.adm .tabs button { font-size: 14px; }
+.avisos { list-style: none; background: var(--amarillo); color: var(--tinta); border-radius: 12px; padding: 10px 12px; font-size: 15px; margin-bottom: 12px; } .avisos li + li { margin-top: 4px; }
+.adm-fila { flex-wrap: wrap; } .adm-fila .fila-txt { min-width: 45%; } mark { background: var(--amarillo); color: var(--tinta); border-radius: 4px; padding: 0 4px; }
+.adm-item { padding: 10px 0; border-bottom: 1.5px solid var(--azul-raya); display: flex; flex-direction: column; gap: 8px; }
+.adm-item.inactivo input { opacity: .6; } .adm-item.prov { background: rgba(247,240,116,.18); border-radius: 12px; padding: 10px; border: 2px dashed var(--amarillo); }
+.adm-bot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } .adm-bot small { margin-left: auto; font-size: 14px; } .adm-bot select { flex: 1; min-width: 0; min-height: 44px; font-size: 16px; }
+.enlace-wa { word-break: break-all; background: var(--azul-hondo); border-radius: 10px; padding: 10px; font-size: 15px; user-select: all; -webkit-user-select: all; }
+
+@media (min-width: 700px) {            /* escritorio: la matriz puede respirar */
+  body[data-ruta="/matriz"] #app { max-width: 1500px; }
+  body[data-ruta="/matriz"] .mx-wrap:not(.mini) { margin: 0 auto; max-width: max-content; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01s !important; transition: none !important; } }
+
+/* ---------- confirmación y aviso de demo ---------- */
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(15,51,80,.6); display: flex; align-items: flex-end; justify-content: center; padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); }
+.modal-caja { width: 100%; max-width: 452px; background: var(--blanco); color: var(--tinta); border-radius: 18px; padding: 18px 16px 16px; font-size: 18px; font-weight: 600; }
+.modal-caja .btn { border-color: var(--tinta); color: var(--tinta); }
+.modal-caja .peligro-lleno { background: #c8321e; border-color: #c8321e; color: var(--blanco); }
+.demo-b { font-size: 15px; background: var(--azul-hondo); border-radius: 12px; padding: 2px 12px; margin-bottom: 8px; }
+
+/* ---------- grupo (varias personas en la misma foto) ---------- */
+.cursiva, option.cursiva { font-style: italic; }
+.mas-tog { margin: -4px 0 0; }
+.mas-lista { display: flex; flex-direction: column; gap: 2px; max-height: 45vh; overflow-y: auto; border: 2px solid var(--azul-raya); border-radius: 12px; padding: 6px 10px; }
+.chk { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.chk input { width: 22px; height: 22px; accent-color: var(--amarillo); flex: none; }
+.chk.inactivo { opacity: .55; }
+.chk-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; min-height: 40px; }
+.chk-inline input { width: 18px; height: 18px; accent-color: var(--amarillo); }
+</style></head>
+<body><div id="app"><div class="boot">f!t</div></div><div id="toast" role="status" aria-live="polite"></div>
+<script>window.RETO29_CONFIG = { MODO: "demo", ROUTER: "memory" };</script>
+<script>(() => {
+// ===== util.js =====
+// Utilidades pequeñas, sin dependencias.
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); // Safari < 15.4
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+// Clave canónica de pareja: independiente del orden. A+B === B+A.
+const pairKey = (x, y) => (x < y ? `${x}|${y}` : `${y}|${x}`);
+
+const norm = (s) => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+const fFecha = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+const fHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit' });
+function fmtCuando(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return `${fFecha.format(d).replace('.', '')}, ${fHora.format(d)}`;
+}
+
+// <input type="datetime-local"> trabaja en hora local sin zona.
+function toLocalInput(d = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fromLocalInput(v) {
+  const d = new Date(v);
+  return isNaN(d) ? new Date().toISOString() : d.toISOString();
+}
+
+// localStorage puede no existir (Safari privado, iframes): se degrada a memoria sin romper.
+const mem = new Map();
+function caja(tipo) { try { const c = window[tipo]; c.setItem('__t', '1'); c.removeItem('__t'); return c; } catch { return null; } }
+const cajas = { local: caja('localStorage'), sesion: caja('sessionStorage') };
+const kv = {
+  get(k, tipo = 'local') { try { return cajas[tipo] ? cajas[tipo].getItem(k) : mem.get(k) ?? null; } catch { return mem.get(k) ?? null; } },
+  set(k, v, tipo = 'local') { try { if (!cajas[tipo]) { v == null ? mem.delete(k) : mem.set(k, v); return true; } v == null ? cajas[tipo].removeItem(k) : cajas[tipo].setItem(k, v); return true; } catch { return false; } },
+};
+
+let toastT;
+function toast(msg, ms = 2600) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms);
+}
+
+const ERRORES = {
+  CODIGO_INVALIDO: 'Ese código no es correcto.',
+  PAREJA_INVALIDA: 'Elige dos personas distintas.',
+  PARTICIPANTE_INVALIDO: 'Alguna de las personas ya no está activa. Recarga la página.',
+  FOTO_NO_SUBIDA: 'La foto no llegó a subirse. Inténtalo otra vez.',
+  RUTA_FOTO_INVALIDA: 'Hubo un problema con la foto. Inténtalo otra vez.',
+  DEMASIADAS_FOTOS: 'Este encuentro ya tiene el máximo de fotos.',
+  NOMBRE_VACIO: 'Escribe un nombre.',
+  NO_ADMIN: 'Esta cuenta no tiene permisos de administración.',
+  RED: 'Sin conexión. Comprueba los datos o el wifi y vuelve a intentarlo.',
+  LOGIN: 'Email o contraseña incorrectos.',
+  DUPLICADO: 'Ya existe un registro igual (pareja o nombre repetido).',
+  EN_USO: 'No se puede borrar porque tiene encuentros asociados. Desactívalo o borra antes sus encuentros.',
+};
+const textoError = (e) => ERRORES[e?.code] || e?.message || 'Algo ha fallado.';
+function err(code, message) { const e = new Error(message || code); e.code = code; return e; }
+
+// ===== image.js =====
+// Compresión en el cliente antes de subir. Sin librerías:
+// <img> + canvas ya respetan la orientación EXIF en Safari ≥13.1 / Chrome ≥81 / Firefox ≥77.
+
+// La foto viaja al servidor como base64 dentro de un JSON (más simple y fiable en móvil que subidas
+// multipart en dos pasos). Por eso el límite de salida es más estricto que si fuera binario directo:
+// base64 pesa ~1.33×, y hay que dejar margen bajo el límite de payload de la función serverless.
+const LADO_FOTO = 1600, LADO_MINI = 400, MAX_ENTRADA = 60 * 1024 * 1024, MAX_SALIDA = 1.5 * 1024 * 1024;
+
+function cargar(file) {
+  return new Promise((ok, ko) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => ok({ img, url });
+    img.onerror = () => { URL.revokeObjectURL(url); ko(err('FORMATO', 'Este móvil no puede leer ese formato de imagen. Prueba con otra foto o haz una captura de pantalla de ella.')); };
+    img.src = url;
+  });
+}
+
+function escalar(img, lado, calidad) {
+  const w0 = img.naturalWidth, h0 = img.naturalHeight;
+  const k = Math.min(1, lado / Math.max(w0, h0));
+  const w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);      // PNG con transparencia → fondo blanco
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(img, 0, 0, w, h);
+  return new Promise((ok, ko) => {
+    const fin = (b) => { c.width = c.height = 0; b ? ok(b) : ko(err('CANVAS', 'No se pudo procesar la foto.')); }; // libera memoria en iOS
+    if (c.toBlob) c.toBlob(fin, 'image/jpeg', calidad);
+    else fetch(c.toDataURL('image/jpeg', calidad)).then((r) => r.blob()).then(fin, ko);
+  });
+}
+
+async function prepararFoto(file) {
+  if (!file) throw err('SIN_FOTO', 'Elige una foto.');
+  const pareceImagen = (file.type || '').startsWith('image/') || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(file.name || '');
+  if (!pareceImagen) throw err('FORMATO', 'Eso no es una imagen.');
+  if (file.size > MAX_ENTRADA) throw err('TAMANO', 'La imagen es demasiado grande.');
+  const { img, url } = await cargar(file);
+  try {
+    if (!img.naturalWidth) throw err('FORMATO', 'No se pudo leer la imagen.');
+    let photo = await escalar(img, LADO_FOTO, 0.82);
+    if (photo.size > MAX_SALIDA) photo = await escalar(img, 1280, 0.68);
+    if (photo.size > MAX_SALIDA) photo = await escalar(img, 1000, 0.6);      // foto muy detallada (mucho ruido): último intento
+    const thumb = await escalar(img, LADO_MINI, 0.72);
+    return { photo, thumb, preview: URL.createObjectURL(thumb) };
+  } finally { URL.revokeObjectURL(url); }
+}
+
+// ===== backend-vercel.js =====
+// Cliente del backend real: una única función serverless /api/reto29 que recibe {fn, args}.
+
+const TOK = 'reto29_admin_token';
+const b64 = (blob) => new Promise((ok, ko) => { const fr = new FileReader(); fr.onload = () => ok(fr.result.split(',')[1]); fr.onerror = ko; fr.readAsDataURL(blob); });
+
+function crearBackend({ API_BASE } = {}) {
+  const base = (API_BASE || '').replace(/\/+$/, '') || '/api/reto29';
+  let token = kv.get(TOK, 'sesion') || null;
+
+  async function llamar(fn, args, code) {
+    let r;
+    try {
+      r = await fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(token ? { 'x-admin-token': token } : {}) }, body: JSON.stringify({ fn, args, code }) });
+    } catch { throw err('RED'); }
+    let j = null; try { j = await r.json(); } catch { /* respuesta vacía */ }
+    if (!j || !j.ok) { if (j?.code === 'NO_ADMIN' && token) { token = null; kv.set(TOK, null, 'sesion'); } throw err(j?.code || 'API', j?.message); }
+    return j.data;
+  }
+
+  return {
+    modo: 'vercel',
+    photoUrl: (p) => p || '',                          // ya es la URL pública completa de Vercel Blob
+    accessInfo: () => llamar('access_info'),
+    getState: (code) => llamar('get_state', {}, code),
+
+    async uploadPhoto(tipo, { photo, thumb }, code) {
+      const [fotoB64, thumbB64] = await Promise.all([b64(photo), b64(thumb)]);
+      return llamar('upload', { tipo, photo: fotoB64, thumb: thumbB64 }, code);
+    },
+    addEncounter: (code, d) => llamar('add_encounter', { quienes: d.quienes, photo_path: d.photo_path, thumb_path: d.thumb_path, place: d.place, occurred_at: d.occurred_at, note: d.note }, code),
+    addEncounterPhoto: (code, id, f) => llamar('add_encounter_photo', { encounter_id: id, photo_path: f.photo_path, thumb_path: f.thumb_path }, code),
+
+    // ----- admin -----
+    haySesion: () => !!token, emailAdmin: () => 'admin',
+    async isAdmin() { if (!token) return false; try { return await llamar('is_admin'); } catch { return false; } },
+    async login(_email, password) { const r = await llamar('login', { password }); token = r.token; kv.set(TOK, token, 'sesion'); },
+    async logout() { token = null; kv.set(TOK, null, 'sesion'); },
+    insert: (tabla, fila) => llamar('admin_insert', { tabla, fila }),
+    update: (tabla, id, cambios) => llamar('admin_update', { tabla, id, cambios }),
+    remove: (tabla, id) => llamar('admin_remove', { tabla, id }),
+    removePhotos: (rutas) => llamar('admin_remove_photos', { rutas }),
+    setCode: (code) => llamar('admin_set_code', { code }),
+  };
+}
+
+// ===== backend-demo.js =====
+// MODO DEMO: misma interfaz que el backend real, pero todo vive en este navegador.
+// Sirve para probar la web sin desplegar nada. Código: "demo". Admin: cualquier email + "demo".
+
+const K = 'reto29_demo_v2';
+const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
+const PROFES = [['Cou', 'profesor'], ['Feña', 'profesor'], ['Gala', 'profesora']];   // no compiten: no cuentan para el 29 ni el ranking
+
+function nuevo() {
+  const now = new Date().toISOString();
+  return {
+    settings: { title: 'RETO 29 · FIT 2026', moderation_enabled: false, code: 'demo' },
+    participants: [
+      ...NOMBRES.map((n) => ({ id: uuid(), display_name: n, sort_name: null, active: true, is_placeholder: false, compites: true, created_at: now })),
+      { id: uuid(), display_name: '¿Nº 30?', sort_name: 'zzz', active: true, is_placeholder: true, compites: true, created_at: now },
+      ...PROFES.map(([n, c]) => ({ id: uuid(), display_name: n, sort_name: 'zzzz' + n, category: c, active: true, is_placeholder: false, compites: false, created_at: now })),
+    ],
+    encounters: [], encounter_photos: [], fotos: {},
+  };
+}
+
+function crearDemo() {
+  let db; try { db = JSON.parse(kv.get(K)); } catch { /* vacío */ }
+  let creada = false;
+  if (!db || db.participants.some((p) => p.compites === undefined)) { db = nuevo(); creada = true; }   // primera vez o esquema antiguo
+  let admin = kv.get(K + '_admin', 'sesion') === '1';
+  const nube = window.storage && typeof window.storage.get === 'function' ? window.storage : null;   // artefactos de Claude
+  const ligero = () => JSON.stringify({ ...db, fotos: Object.fromEntries(Object.entries(db.fotos).filter(([p]) => p.endsWith('_t.jpg'))) });
+  const guardar = () => { const j = ligero(); kv.set(K, j); if (nube) nube.set(K, j, false).catch(() => {}); };
+  if (creada) guardar();   // los ids de la semilla deben sobrevivir a un recargo aunque aún no haya ningún encuentro
+  const listo = (nube ? nube.get(K, false).then((r) => { if (r?.value) { const cand = JSON.parse(r.value); if (cand.participants?.some((p) => p.compites !== undefined)) db = cand; } }).catch(() => {}) : Promise.resolve()).then(() => { if (creada) guardar(); });
+  const espera = (ms = 120) => new Promise((r) => setTimeout(r, ms));
+  const acceso = (code) => { if (!admin && db.settings.code && String(code || '').trim().toLowerCase() !== db.settings.code) throw err('CODIGO_INVALIDO'); };
+  const aDataUrl = (b) => new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); });
+  const soloAdmin = () => { if (!admin) throw err('NO_ADMIN'); };
+  const cuando = (v) => v || new Date().toISOString();
+  const activos = () => new Set(db.participants.filter((p) => p.active).map((p) => p.id));
+  const mismoGrupo = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+
+  const api = {
+    modo: 'demo',
+    photoUrl: (p) => db.fotos[p] || db.fotos[String(p).replace(/\.jpg$/, '_t.jpg')] || '',
+    async accessInfo() { await espera(); return { code_required: !!db.settings.code, title: db.settings.title }; },
+    async getState(code) {
+      await espera(); acceso(code);
+      const { fotos, settings, ...resto } = db;
+      return JSON.parse(JSON.stringify({ ...resto, settings: { title: settings.title, moderation_enabled: settings.moderation_enabled, code_required: !!settings.code } }));
+    },
+    async uploadPhoto(tipo, { photo, thumb }) {
+      const id = uuid(); const photo_path = `${tipo}/${id}.jpg`, thumb_path = `${tipo}/${id}_t.jpg`;
+      db.fotos[thumb_path] = await aDataUrl(thumb);
+      db.fotos[photo_path] = await aDataUrl(photo);
+      return { photo_path, thumb_path };
+    },
+    // d.quienes: array de ids (>=2). Si ya existe una foto con EXACTAMENTE ese mismo grupo, se ofrece añadirla como extra.
+    async addEncounter(code, d) {
+      await espera(); acceso(code);
+      const act = activos(), quienes = [...new Set(d.quienes)].filter((id) => act.has(id));
+      if (quienes.length < 2) throw err('PAREJA_INVALIDA');
+      const ya = db.encounters.find((e) => e.status !== 'pending-borrado' && mismoGrupo(e.participants, quienes));
+      if (ya) return { created: false, encounter: { ...ya } };
+      if (!db.fotos[d.photo_path]) throw err('FOTO_NO_SUBIDA');
+      const e = { id: uuid(), participants: quienes, photo_path: d.photo_path, thumb_path: d.thumb_path, place: d.place?.trim() || null, occurred_at: cuando(d.occurred_at), note: d.note?.trim() || null, status: db.settings.moderation_enabled ? 'pending' : 'published', created_at: new Date().toISOString() };
+      db.encounters.push(e); guardar();
+      return { created: true, encounter: { ...e } };
+    },
+    async addEncounterPhoto(code, id, f) {
+      await espera(); acceso(code);
+      if (db.encounter_photos.filter((x) => x.encounter_id === id).length >= 5) throw err('DEMASIADAS_FOTOS');
+      const r = { id: uuid(), encounter_id: id, ...f, created_at: new Date().toISOString() };
+      db.encounter_photos.push(r); guardar(); return { ...r };
+    },
+
+    haySesion: () => admin, emailAdmin: () => 'admin@demo',
+    async isAdmin() { return admin; },
+    async login(_email, password) { await espera(); if (password !== 'demo') throw err('LOGIN'); admin = true; kv.set(K + '_admin', '1', 'sesion'); },
+    async logout() { admin = false; kv.set(K + '_admin', null, 'sesion'); },
+    async insert(tabla, fila) {
+      soloAdmin();
+      if (db[tabla].some((x) => x.display_name && x.display_name.toLowerCase() === String(fila.display_name || '').toLowerCase())) throw err('DUPLICADO');
+      const r = { id: uuid(), active: true, compites: true, created_at: new Date().toISOString(), ...fila }; db[tabla].push(r); guardar(); return { ...r };
+    },
+    async update(tabla, id, cambios) {
+      soloAdmin();
+      if (tabla === 'settings') { Object.assign(db.settings, cambios); guardar(); return { ...db.settings }; }
+      const r = db[tabla].find((x) => x.id === id); if (!r) throw err('API', 'No existe');
+      if (tabla === 'encounters' && cambios.participants) { if (cambios.participants.length < 2) throw err('PAREJA_INVALIDA'); }
+      if (cambios.display_name) {
+        if (db[tabla].some((x) => x.id !== id && x.display_name.toLowerCase() === cambios.display_name.toLowerCase())) throw err('DUPLICADO');
+      }
+      Object.assign(r, cambios); guardar(); return { ...r };
+    },
+    async remove(tabla, id) {
+      soloAdmin();
+      if (tabla === 'participants' && db.encounters.some((e) => e.participants.includes(id))) throw err('EN_USO');
+      db[tabla] = db[tabla].filter((x) => x.id !== id);
+      if (tabla === 'encounters') db.encounter_photos = db.encounter_photos.filter((f) => f.encounter_id !== id);
+      guardar();
+    },
+    async removePhotos(rutas) { rutas.forEach((p) => delete db.fotos[p]); guardar(); },
+    async setCode(code) { soloAdmin(); db.settings.code = String(code || '').trim().toLowerCase() || null; guardar(); },
+    listo,
+
+    // --- solo demo: datos de ejemplo para ver la web "viva" ---
+    async vaciar() { db = nuevo(); guardar(); },
+    async sembrar(yo, n = 140) {
+      const act = db.participants.filter((p) => p.active && p.compites), lugares = ['Praza da Quintana', 'Rúa Nova', 'Café Moderna', 'Alameda', 'Sala Capitol', '', '', ''];
+      const retrato = (nombres, h) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="hsl(${h} 55% 45%)"/><circle cx="140" cy="170" r="70" fill="hsl(${h + 40} 70% 80%)"/><circle cx="265" cy="185" r="70" fill="hsl(${h + 200} 70% 85%)"/><rect y="290" width="400" height="110" fill="rgba(0,0,0,.35)"/><text x="200" y="358" font-family="sans-serif" font-weight="700" font-size="34" fill="#fff" text-anchor="middle">${nombres.join(' + ').slice(0, 26)}</text></svg>`);
+      const pares = []; for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) pares.push([act[i], act[j]]);
+      const mio = (x) => x[0].id === yo || x[1].id === yo, azar = (l) => l.map((x) => [Math.random(), x]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+      const orden = [...azar(pares.filter(mio)).slice(0, 18), ...azar(pares.filter((x) => !mio(x)))];
+      let hechos = 0;
+      for (const [p, q] of orden) {
+        if (hechos >= n) break;
+        if (db.encounters.some((e) => mismoGrupo(e.participants, [p.id, q.id]))) continue;
+        const id = uuid(), ruta = `enc/${id}_t.jpg`; db.fotos[ruta] = retrato([p.display_name, q.display_name], Math.floor(Math.random() * 360));
+        const t = new Date(Date.now() - Math.random() * 12 * 864e5).toISOString();
+        db.encounters.push({ id: uuid(), participants: [p.id, q.id], photo_path: `enc/${id}.jpg`, thumb_path: ruta, place: lugares[Math.floor(Math.random() * lugares.length)] || null, occurred_at: t, note: null, status: 'published', created_at: t });
+        hechos++;
+      }
+      // una foto de grupo de ejemplo (3 personas), para que se vea el caso de varias-a-la-vez
+      if (act.length >= 3 && yo) {
+        const otros = act.filter((p) => p.id !== yo).slice(0, 2);
+        if (otros.length === 2 && !db.encounters.some((e) => mismoGrupo(e.participants, [yo, ...otros.map((p) => p.id)]))) {
+          const id = uuid(), ruta = `enc/${id}_t.jpg`, nombresG = [db.participants.find((p) => p.id === yo)?.display_name, ...otros.map((p) => p.display_name)];
+          db.fotos[ruta] = retrato(nombresG, 210);
+          const t = new Date().toISOString();
+          db.encounters.push({ id: uuid(), participants: [yo, ...otros.map((p) => p.id)], photo_path: `enc/${id}.jpg`, thumb_path: ruta, place: 'Foto de grupo', occurred_at: t, note: null, status: 'published', created_at: t });
+        }
+      }
+      guardar();
+    },
+  };
+  return api;
+}
+
+// ===== store.js =====
+// Estado de la app + TODOS los cálculos derivados (progreso, ranking, matriz).
+// No se guarda ningún contador: todo sale de qué participantes salen en cada foto.
+
+
+
+const cfg = window.RETO29_CONFIG || {};
+const backend = cfg.MODO === 'demo' ? crearDemo() : crearBackend(cfg);
+
+const K_YO = 'reto29_yo', K_COD = 'reto29_codigo', K_CACHE = 'reto29_cache_' + backend.modo;
+const ls = kv;
+
+const S = {
+  data: null,            // respuesta cruda de get_state
+  yo: ls.get(K_YO),      // id del participante elegido en ESTE dispositivo (no es seguridad)
+  codigo: ls.get(K_COD) || '',
+  admin: false,
+  cargando: false,
+  firma: '',
+};
+
+// ---- derivados (se recalculan al cambiar data) ----
+let D = vacio();
+function vacio() { return { gente: [], todos: [], porId: new Map(), parejas: new Map(), cuenta: new Map(), total: 0, encuentros: [], porPersona: new Map(), fotosExtra: new Map() }; }
+
+const coll = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+const ordenar = (arr) => [...arr].sort((x, y) => coll.compare(x.sort_name || x.display_name, y.sort_name || y.display_name));
+
+function derivar() {
+  const d = S.data; if (!d) { D = vacio(); return; }
+  const todos = ordenar(d.participants.filter((p) => p.active));
+  const gente = todos.filter((p) => p.compites);                       // solo quien compite entra en el reto/ranking/matriz
+  const porId = new Map(d.participants.map((p) => [p.id, p]));
+  const compiteActivo = new Set(gente.map((p) => p.id));
+  const encuentros = d.encounters.filter((e) => e.status === 'published').map((e) => ({ ...e, quienes: (e.participants || []).filter((id) => porId.get(id)?.active) })).filter((e) => e.quienes.length >= 2);
+  encuentros.sort((x, y) => (x.occurred_at < y.occurred_at ? 1 : -1));
+
+  const parejas = new Map(), cuenta = new Map(gente.map((p) => [p.id, 0])), porPersona = new Map(todos.map((p) => [p.id, []]));
+  for (const e of encuentros) {
+    for (const id of e.quienes) porPersona.get(id)?.push(e);
+    for (let i = 0; i < e.quienes.length; i++) for (let j = i + 1; j < e.quienes.length; j++) {
+      const [x, y] = [e.quienes[i], e.quienes[j]];
+      if (!compiteActivo.has(x) || !compiteActivo.has(y)) continue;      // una foto con un profe no cuenta para el reto
+      const k = pairKey(x, y);
+      if (!parejas.has(k)) { parejas.set(k, e); cuenta.set(x, cuenta.get(x) + 1); cuenta.set(y, cuenta.get(y) + 1); }
+    }
+  }
+  const fotosExtra = new Map();
+  for (const f of d.encounter_photos || []) (fotosExtra.get(f.encounter_id) || fotosExtra.set(f.encounter_id, []).get(f.encounter_id)).push(f);
+  D = { gente, todos, porId, parejas, cuenta, total: Math.max(0, gente.length - 1), encuentros, porPersona, fotosExtra };
+}
+
+const nombre = (id) => D.porId.get(id)?.display_name || '¿?';
+const compite = (id) => !!D.porId.get(id)?.compites;
+const encuentroDe = (x, y) => D.parejas.get(pairKey(x, y)) || null;
+const misEncuentros = (id) => D.porPersona.get(id) || [];
+// Orden de nombres al presentar una foto: yo primero si estoy; si no, por orden de la lista de personas.
+function ordenNombres(e) {
+  const ids = [...e.quienes];
+  const i = (id) => D.todos.findIndex((p) => p.id === id);
+  ids.sort((x, y) => (x === S.yo ? -1 : y === S.yo ? 1 : i(x) - i(y)));
+  return ids;
+}
+
+// Ranking: personas distintas encontradas (solo quien compite). Empates comparten puesto (1,2,2,4).
+function ranking() {
+  const filas = D.gente.map((p) => ({ p, n: D.cuenta.get(p.id) || 0 })).sort((x, y) => y.n - x.n || coll.compare(x.p.display_name, y.p.display_name));
+  let puesto = 0, ant = null;
+  filas.forEach((f, i) => { if (f.n !== ant) { puesto = i + 1; ant = f.n; } f.puesto = puesto; });
+  return filas;
+}
+
+const oyentes = new Set();
+const alCambiar = (fn) => oyentes.add(fn);
+const avisar = (motivo) => oyentes.forEach((fn) => fn(motivo));
+
+function poner(data, motivo) {
+  const firma = JSON.stringify(data);
+  const cambio = firma !== S.firma;
+  S.data = data; S.firma = firma; derivar();
+  if (S.yo && !D.porId.get(S.yo)?.active) { S.yo = null; ls.set(K_YO, null); }
+  if (cambio) { ls.set(K_CACHE, firma); avisar(motivo); }
+  return cambio;
+}
+
+function arrancarDesdeCache() {
+  const c = ls.get(K_CACHE); if (!c) return false;
+  try { S.data = JSON.parse(c); S.firma = c; derivar(); return true; } catch { return false; }
+}
+
+let cola = Promise.resolve();
+function refrescar(motivo = 'refresco') {       // en serie: un refresco tras un alta/borrado nunca se salta
+  const tarea = cola.then(async () => { S.cargando = true; try { poner(await backend.getState(S.codigo), motivo); } finally { S.cargando = false; } });
+  cola = tarea.catch(() => {});
+  return tarea;
+}
+
+async function entrar(codigo) {            // valida el código contra el servidor
+  const data = await backend.getState(codigo);
+  S.codigo = (codigo || '').trim(); ls.set(K_COD, S.codigo || null);
+  poner(data, 'entrada');
+}
+
+function elegirYo(id) { S.yo = id; ls.set(K_YO, id); avisar('yo'); }
+function olvidarAcceso() { S.codigo = ''; ls.set(K_COD, null); ls.set(K_CACHE, null); S.data = null; S.firma = ''; derivar(); }
+
+// Aplica en local el resultado de un alta para que la pantalla responda al instante.
+function aplicarLocal(fn) { const d = JSON.parse(S.firma); fn(d); poner(d, 'local'); }
+
+// ===== ui.js =====
+// Piezas compartidas entre vistas públicas y admin.
+
+
+
+const acts = {};                       // registro de acciones: data-act / data-ch / data-in
+const nav = { ir: () => {}, render: () => {}, ruta: { path: '/', q: new URLSearchParams() } };
+
+const svg = (d, extra = '') => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${d}</svg>`;
+const ico = {
+  casa: svg('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/>'),
+  yo: svg('<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1-4 4-5.6 7.2-5.6s6.2 1.6 7.2 5.6"/>'),
+  matriz: svg('<rect x="4" y="4" width="6.5" height="6.5" rx="1.2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2"/>'),
+  copa: svg('<path d="M7.5 4h9v5.5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6H4.500c0 3 1.3 4.5 3.3 4.800M16.5 6h3c0 3-1.3 4.5-3.3 4.800M12 14v4M8.5 20h7"/>'),
+  camara: svg('<path d="M4 8.500h3.200L8.8 6h6.400l1.6 2.500H20a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.500a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.4"/>'),
+  galeria: svg('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.7"/><path d="m4.5 17.5 5-4.5 3.5 3 2.5-2 4 3.5"/>'),
+  atras: svg('<path d="M14.5 5.5 8 12l6.5 6.5"/>'),
+  check: svg('<path d="m5 12.5 4.5 4.500L19 7.5"/>', 'stroke-width="3"'),
+  mas: svg('<path d="M12 5.500v13M5.5 12h13"/>'),
+  estrella: svg('<path d="m12 3.8 2.5 5.2 5.7.700-4.2 3.9 1.1 5.600L12 16.400l-5.1 2.800L8 13.6 3.8 9.700l5.7-.7z"/>'),
+  lugar: svg('<path d="M12 21s6.5-5.6 6.5-11A6.5 6.5 0 0 0 5.5 10c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.3"/>'),
+  flecha: svg('<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>'),
+};
+
+// Selector de foto reutilizable. F = objeto de estado del formulario.
+function fotoPicker(F, ch = 'foto') {
+  if (F.preview) {
+    return `<div class="foto-prev"><img src="${esc(F.preview)}" alt="Foto elegida">
+      <label class="btn btn-mini foto-cambiar">Cambiar foto<input class="vh" type="file" accept="image/*" data-ch="${ch}"></label></div>`;
+  }
+  if (F.procesando) return `<div class="foto-vacia"><span class="spin"></span> Preparando foto…</div>`;
+  return `<div class="foto-botones">
+      <label class="btn btn-foto">${ico.camara}<span>Hacer foto</span><input class="vh" type="file" accept="image/*" capture="environment" data-ch="${ch}"></label>
+      <label class="btn btn-foto">${ico.galeria}<span>Galería</span><input class="vh" type="file" accept="image/*" data-ch="${ch}"></label>
+    </div>${F.errFoto ? `<p class="error">${esc(F.errFoto)}</p>` : ''}`;
+}
+
+// Devuelve una función para registrar como acción "foto" que rellena F.
+function manejarFoto(getF) {
+  return async (input) => {
+    const F = getF(); const file = input.files?.[0]; if (!file) return;
+    if (F.preview) URL.revokeObjectURL(F.preview);
+    Object.assign(F, { preview: null, blobs: null, rutas: null, procesando: true, errFoto: '' }); nav.render();
+    try { const r = await prepararFoto(file); Object.assign(F, { blobs: { photo: r.photo, thumb: r.thumb }, preview: r.preview }); }
+    catch (e) { F.errFoto = e.message || 'No se pudo leer la foto.'; }
+    F.procesando = false; nav.render();
+  };
+}
+
+function confirmar(texto, boton = 'Eliminar') {
+  return new Promise((ok) => {
+    const d = document.createElement('div'); d.className = 'modal'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true');
+    d.innerHTML = `<div class="modal-caja"><p>${esc(texto)}</p><div class="dos"><button class="btn" data-r="0">Cancelar</button><button class="btn peligro-lleno" data-r="1">${esc(boton)}</button></div></div>`;
+    d.addEventListener('click', (ev) => { const r = ev.target.closest('[data-r]'); if (!r && ev.target !== d) return; ev.stopPropagation(); d.remove(); ok(r?.dataset.r === '1'); });
+    document.body.appendChild(d); d.querySelector('[data-r="0"]').focus();
+  });
+}
+
+async function subirSiHaceFalta(F, tipo) {      // no resube si ya se subió en un intento previo
+  if (!F.rutas) F.rutas = await backend.uploadPhoto(tipo, F.blobs, S.codigo);
+  return F.rutas;
+}
+
+const nombreH = (id) => (compite(id) ? esc(nombre(id)) : `<i>${esc(nombre(id))}</i>`);   // profes en cursiva: no compiten
+
+const img = (ruta, alt = '', cls = '') => (ruta ? `<img class="${cls}" src="${esc(backend.photoUrl(ruta))}" alt="${esc(alt)}" loading="lazy" decoding="async">` : '');
+
+// ===== admin.js =====
+// Panel /admin. La protección REAL está en el servidor (contraseña única + token firmado): esto es solo la interfaz.
+
+
+
+const A = { tab: 'enc', login: { error: '', ocupado: false }, filtro: '', edit: null, enlace: '' };
+
+const cab = () => `<header class="top sub-top"><a class="ic-btn" href="/" data-link aria-label="Salir del panel">✕</a><h1>Administración</h1><button class="ic-btn txt" data-act="adm-salir">Salir</button></header>`;
+
+function vistaAdmin() {
+  if (!S.admin) {
+    return `<header class="top sub-top"><a class="ic-btn" href="/" data-link aria-label="Volver">✕</a><h1>Administración</h1><span class="ic-btn"></span></header>
+    <main class="pag"><form class="form" data-submit="adm-login">
+      <label class="campo"><span>Contraseña de administración</span><input name="password" type="password" autocomplete="current-password" required></label>
+      ${A.login.error ? `<p class="error">${esc(A.login.error)}</p>` : ''}
+      <button class="cta" ${A.login.ocupado ? 'disabled' : ''}>${A.login.ocupado ? 'Entrando…' : 'ENTRAR'}</button>
+      ${backend.modo === 'demo' ? '<p class="nota">Modo demo: la contraseña es <b>demo</b>.</p>' : ''}
+    </form></main>`;
+  }
+  if (!S.data) return `${cab()}<main class="pag"><p class="cargando"><span class="spin"></span> Cargando…</p></main>`;
+  const e = nav.ruta.q.get('e');
+  if (e) return vistaEditar(e);
+  const tabs = [['enc', 'Encuentros'], ['gente', 'Participantes'], ['ajustes', 'Ajustes']];
+  return `${cab()}<main class="pag adm">
+    <div class="seg ancho tabs" role="tablist">${tabs.map(([k, t]) => `<button class="${A.tab === k ? 'on' : ''}" data-act="adm-tab" data-t="${k}">${t}</button>`).join('')}</div>
+    ${{ enc: tabEncuentros, gente: tabGente, ajustes: tabAjustes }[A.tab]()}
+  </main>`;
+}
+
+acts['adm-login'] = async (f) => {
+  A.login = { error: '', ocupado: true }; nav.render();
+  try { await backend.login('', f.password.value); S.admin = true; await refrescar('admin'); }
+  catch (e) { A.login.error = textoError(e); }
+  A.login.ocupado = false; nav.render();
+};
+acts['adm-salir'] = async () => { await backend.logout(); S.admin = false; try { await refrescar('admin'); } catch { /* sin código */ } nav.ir('/', { replace: true }); };
+acts['adm-tab'] = (el) => { A.tab = el.dataset.t; nav.render(); };
+
+async function hacer(fn, ok) {            // ejecuta, refresca desde servidor y avisa
+  try { await fn(); await refrescar('admin'); if (ok) toast(ok); }
+  catch (e) { toast(textoError(e), 4500); }
+  nav.render();
+}
+
+// ---------------------------------------------------------------- Encuentros
+function avisos() {
+  const d = S.data, out = [];
+  const pend = d.encounters.filter((e) => e.status === 'pending').length;
+  if (pend) out.push(`${pend} encuentro(s) pendientes de revisión.`);
+  const act = d.participants.filter((p) => p.active && p.compites);
+  if (act.length !== 30) out.push(`Hay ${act.length} participantes activos que compiten (deberían ser 30).`);
+  if (act.some((p) => p.is_placeholder)) out.push('Falta poner nombre al participante nº30 (pestaña Participantes).');
+  const vistos = new Map();
+  for (const p of d.participants) { const k = norm(p.display_name); if (vistos.has(k)) out.push(`Nombres casi iguales: «${vistos.get(k)}» y «${p.display_name}».`); else vistos.set(k, p.display_name); }
+  return out.length ? `<ul class="avisos">${out.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+}
+function tabEncuentros() {
+  const f = norm(A.filtro);
+  const lista = [...S.data.encounters].sort((x, y) => (x.status !== y.status ? (x.status === 'pending' ? -1 : 1) : x.created_at < y.created_at ? 1 : -1))
+    .filter((e) => !f || norm(e.participants.map(nombre).join(' ') + ' ' + (e.place || '')).includes(f));
+  return `${avisos()}
+    <label class="campo"><input type="search" data-in="adm-filtro" value="${esc(A.filtro)}" placeholder="Buscar por nombre o lugar" autocomplete="off"></label>
+    <p class="nota">${lista.length} de ${S.data.encounters.length} encuentros · más recientes primero</p>
+    <div id="adm-lista">${lista.map((e) => `<div class="fila adm-fila">${img(e.thumb_path || e.photo_path, '', 'mini')}
+      <span class="fila-txt"><b>${e.participants.map(nombreH).join(' × ')}</b><small>${e.status === 'pending' ? '<mark>pendiente</mark> · ' : ''}${e.place ? esc(e.place) + ' · ' : ''}${fmtCuando(e.occurred_at)}${(D.fotosExtra.get(e.id) || []).length ? ' · +' + D.fotosExtra.get(e.id).length + ' fotos' : ''}</small></span>
+      ${e.status === 'pending' ? `<button class="btn btn-mini" data-act="adm-aprobar" data-id="${e.id}">Aprobar</button>` : ''}
+      <a class="btn btn-mini" href="/admin?e=${e.id}" data-link>Editar</a></div>`).join('') || '<p class="vacio">Nada por aquí.</p>'}</div>`;
+}
+acts['adm-filtro'] = (el) => { A.filtro = el.value; const pos = el.selectionStart; nav.render(); const n = document.querySelector('[data-in="adm-filtro"]'); n?.focus(); n?.setSelectionRange(pos, pos); };
+acts['adm-aprobar'] = (el) => hacer(() => backend.update('encounters', el.dataset.id, { status: 'published' }), 'Publicado');
+
+async function borrarEncuentro(id) {
+  const e = S.data.encounters.find((x) => x.id === id); if (!e) return;
+  if (!(await confirmar(`¿Eliminar el encuentro de ${e.participants.map(nombre).join(', ')}?`))) return;
+  const fotos = [e.photo_path, e.thumb_path, ...(S.data.encounter_photos || []).filter((f) => f.encounter_id === id).flatMap((f) => [f.photo_path, f.thumb_path])];
+  await hacer(async () => { await backend.remove('encounters', id); await backend.removePhotos(fotos); }, 'Encuentro eliminado');
+  nav.ir(S.admin && nav.ruta.path === '/admin' ? '/admin' : '/', { replace: true });
+}
+acts['adm-borrar-enc'] = (el) => borrarEncuentro(el.dataset.id);
+acts['adm-borrar-foto'] = async (el) => {
+  const f = S.data.encounter_photos.find((x) => x.id === el.dataset.id); if (!f || !(await confirmar('¿Borrar esta foto adicional?'))) return;
+  hacer(async () => { await backend.remove('encounter_photos', f.id); await backend.removePhotos([f.photo_path, f.thumb_path]); }, 'Foto borrada');
+};
+
+function vistaEditar(id) {
+  const e = S.data.encounters.find((x) => x.id === id);
+  const cabE = `<header class="top sub-top"><a class="ic-btn" href="/admin" data-link aria-label="Volver">‹</a><h1>Editar encuentro</h1><span class="ic-btn"></span></header>`;
+  if (!e) return `${cabE}<main class="pag"><p class="vacio">No existe.</p></main>`;
+  if (!A.edit || A.edit.id !== id) A.edit = { id, quienes: [...e.participants], place: e.place || '', note: e.note || '', cuando: toLocalInput(new Date(e.occurred_at)), status: e.status, preview: null, blobs: null, procesando: false, error: '', ocupado: false };
+  const F = A.edit, gente = ordenar(S.data.participants);
+  return `${cabE}<main class="pag"><form class="form" data-submit="adm-guardar-enc">
+    <div class="campo"><span>Quiénes salen (${F.quienes.length})</span>
+      <div class="mas-lista">${gente.map((p) => `<label class="chk ${p.active ? '' : 'inactivo'}"><input type="checkbox" data-ch="adm-e-quien" value="${p.id}" ${F.quienes.includes(p.id) ? 'checked' : ''}> ${nombreH(p.id)}${p.active ? '' : ' <small>(inactivo)</small>'}</label>`).join('')}</div></div>
+    <div class="campo"><span>Foto</span>${F.preview || F.procesando ? fotoPicker(F, 'adm-foto') : `<div class="foto-prev">${img(e.thumb_path || e.photo_path, '')}<label class="btn btn-mini foto-cambiar">Sustituir foto<input class="vh" type="file" accept="image/*" data-ch="adm-foto"></label></div>`}</div>
+    <label class="campo"><span>Lugar</span><input type="text" data-in="adm-e-place" value="${esc(F.place)}" maxlength="120"></label>
+    <label class="campo"><span>Fecha y hora</span><input type="datetime-local" data-in="adm-e-cuando" value="${esc(F.cuando)}"></label>
+    <label class="campo"><span>Nota</span><input type="text" data-in="adm-e-note" value="${esc(F.note)}" maxlength="500"></label>
+    <label class="campo"><span>Estado</span><select data-ch="adm-e-status"><option value="published" ${F.status === 'published' ? 'selected' : ''}>Publicado</option><option value="pending" ${F.status === 'pending' ? 'selected' : ''}>Pendiente (oculto)</option></select></label>
+    ${F.error ? `<p class="error">${esc(F.error)}</p>` : ''}
+    <button class="cta" ${F.ocupado || F.procesando ? 'disabled' : ''}>${F.ocupado ? 'Guardando…' : 'GUARDAR CAMBIOS'}</button>
+    <button type="button" class="btn peligro" data-act="adm-borrar-enc" data-id="${e.id}">Eliminar encuentro</button>
+  </form></main>`;
+}
+acts['adm-e-quien'] = (el) => { A.edit.quienes = el.checked ? [...A.edit.quienes, el.value] : A.edit.quienes.filter((id) => id !== el.value); };
+for (const k of ['status']) acts[`adm-e-${k}`] = (el) => { A.edit[k] = el.value; };
+for (const k of ['place', 'note', 'cuando']) acts[`adm-e-${k}`] = (el) => { A.edit[k] = el.value; };
+acts['adm-foto'] = (input) => manejarFoto(() => A.edit)(input);
+acts['adm-guardar-enc'] = async () => {
+  const F = A.edit, e = S.data.encounters.find((x) => x.id === F.id); if (!e || F.ocupado) return;
+  if (F.quienes.length < 2) { F.error = 'Deja al menos dos personas.'; return nav.render(); }
+  F.ocupado = true; F.error = ''; nav.render();
+  try {
+    const cambios = { participants: F.quienes, place: F.place.trim() || null, note: F.note.trim() || null, occurred_at: fromLocalInput(F.cuando), status: F.status };
+    let viejas = [];
+    if (F.blobs) { const r = await backend.uploadPhoto('enc', F.blobs, S.codigo); Object.assign(cambios, r); viejas = [e.photo_path, e.thumb_path]; }
+    await backend.update('encounters', F.id, cambios);
+    await backend.removePhotos(viejas);
+    await refrescar('admin'); toast('Guardado'); A.edit = null; nav.ir('/admin', { replace: true });
+  } catch (err) { F.error = textoError(err); F.ocupado = false; nav.render(); }
+};
+
+// ---------------------------------------------------------------- Participantes
+function tabGente() {
+  const gente = ordenar(S.data.participants), act = gente.filter((p) => p.active && p.compites).length;
+  return `<p class="nota">${act} activos que compiten, de ${gente.filter((p) => p.compites).length}. Cada uno tiene ${Math.max(0, act - 1)} encuentros posibles. Los profes (en cursiva) no compiten.</p>
+    ${gente.map((p) => `<form class="adm-item ${p.is_placeholder ? 'prov' : ''} ${p.active ? '' : 'inactivo'}" data-submit="adm-p-guardar" data-id="${p.id}">
+      ${p.is_placeholder ? '<p class="error">Provisional: escribe aquí el nombre real del nº30 y guarda.</p>' : ''}
+      <input type="text" name="nombre" value="${esc(p.is_placeholder ? '' : p.display_name)}" placeholder="${p.is_placeholder ? 'Nombre del participante nº30' : ''}" maxlength="40" required autocomplete="off" class="${p.compites ? '' : 'cursiva'}">
+      <div class="adm-bot">
+      <label class="chk-inline"><input type="checkbox" data-act="adm-p-compite" data-id="${p.id}" ${p.compites ? 'checked' : ''}> Compite</label>
+      <button class="btn btn-mini">Guardar</button>
+      <button type="button" class="btn btn-mini" data-act="adm-p-activo" data-id="${p.id}">${p.active ? 'Desactivar' : 'Activar'}</button>
+      <button type="button" class="btn btn-mini peligro" data-act="adm-p-borrar" data-id="${p.id}">Borrar</button>
+      <small>${D.cuenta.get(p.id) ?? 0} enc.</small></div></form>`).join('')}
+    <form class="adm-item nuevo" data-submit="adm-p-nuevo"><input type="text" name="nombre" placeholder="Añadir participante" maxlength="40" required autocomplete="off"><div class="adm-bot"><label class="chk-inline"><input type="checkbox" name="compite" checked> Compite</label><button class="btn btn-mini">Añadir</button></div></form>`;
+}
+acts['adm-p-guardar'] = (f) => hacer(() => backend.update('participants', f.dataset.id, { display_name: f.nombre.value.trim(), is_placeholder: false, sort_name: null }), 'Nombre guardado');
+acts['adm-p-activo'] = (el) => { const p = S.data.participants.find((x) => x.id === el.dataset.id); hacer(() => backend.update('participants', p.id, { active: !p.active })); };
+acts['adm-p-compite'] = (el) => { const p = S.data.participants.find((x) => x.id === el.dataset.id); hacer(() => backend.update('participants', p.id, { compites: el.checked })); };
+acts['adm-p-borrar'] = async (el) => { const p = S.data.participants.find((x) => x.id === el.dataset.id); if (await confirmar(`¿Borrar a ${p.display_name}? Solo se puede si no tiene encuentros.`)) hacer(() => backend.remove('participants', p.id), 'Borrado'); };
+acts['adm-p-nuevo'] = (f) => hacer(() => backend.insert('participants', { display_name: f.nombre.value.trim(), compites: f.compite.checked }), 'Añadido');
+
+// ---------------------------------------------------------------- Ajustes
+function tabAjustes() {
+  const s = S.data.settings;
+  return `<form class="form" data-submit="adm-codigo">
+      <h2 class="h2">Código del reto</h2>
+      <p class="nota">Ahora mismo: <b>${s.code_required ? 'se pide código' : 'entrada libre (sin código)'}</b>. El código no se puede consultar (se guarda cifrado); solo cambiarlo. Al cambiarlo, todos tendrán que usar el nuevo.</p>
+      <label class="campo"><span>Nuevo código <em>vacío = sin código</em></span><input type="text" name="codigo" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+      <button class="btn">Cambiar código</button>
+      ${A.enlace ? `<p class="nota">Enlace para WhatsApp (entra sin teclear nada):</p><p class="enlace-wa">${esc(A.enlace)}</p><button type="button" class="btn btn-mini" data-act="adm-copiar">Copiar enlace</button>` : ''}
+    </form>
+    <div class="form"><h2 class="h2">Moderación</h2>
+      <p class="nota">${s.moderation_enabled ? 'Activada: los encuentros nuevos quedan ocultos hasta que los apruebes.' : 'Desactivada: los encuentros se publican al instante (recomendado).'}</p>
+      <button class="btn" data-act="adm-moderacion">${s.moderation_enabled ? 'Desactivar moderación previa' : 'Activar moderación previa'}</button></div>
+    ${backend.modo === 'demo' ? `<div class="form"><h2 class="h2">Demo</h2><button class="btn" data-act="demo-sembrar">Rellenar con encuentros de ejemplo</button><button class="btn peligro" data-act="demo-vaciar">Vaciar la demo</button></div>` : ''}
+    <p class="nota">modo ${backend.modo}</p>`;
+}
+acts['adm-codigo'] = (f) => { const c = f.codigo.value.trim(); hacer(async () => { await backend.setCode(c); A.enlace = c ? `${location.origin}/?c=${encodeURIComponent(c)}` : ''; }, c ? 'Código cambiado' : 'Código quitado'); };
+acts['adm-copiar'] = async () => { try { await navigator.clipboard.writeText(A.enlace); toast('Copiado'); } catch { toast('Mantén pulsado el enlace para copiarlo'); } };
+acts['adm-moderacion'] = () => hacer(() => backend.update('settings', null, { moderation_enabled: !S.data.settings.moderation_enabled }));
+
+// ---------------------------------------------------------------- solo modo demo
+acts['demo-sembrar'] = async () => { await backend.sembrar(S.yo); await refrescar('admin'); toast('Ejemplos añadidos'); nav.render(); };
+acts['demo-vaciar'] = async () => { if (!(await confirmar('¿Vaciar todos los datos de la demo?', 'Vaciar'))) return; await backend.vaciar(); await refrescar('admin'); toast('Demo vacía'); nav.render(); };
+
+// ===== main.js =====
+
+
+
+
+const app = document.getElementById('app');
+
+// ------------------------------------------------------------------ router
+// Dos modos: URLs reales (despliegue normal) o pila en memoria (ROUTER:'memory', para incrustar la web
+// en un iframe/vista previa donde no se puede tocar la barra de direcciones).
+const MEM = (window.RETO29_CONFIG || {}).ROUTER === 'memory';
+const pila = ['/'];
+function leerRuta() {
+  const u = MEM ? new URL(pila[pila.length - 1], 'http://x') : location;
+  return { path: u.pathname.replace(/\/+$/, '') || '/', q: new URLSearchParams(u.search) };
+}
+function ponerURL(url, replace) {
+  if (MEM) { replace ? (pila[pila.length - 1] = url) : pila.push(url); }
+  else history[replace ? 'replaceState' : 'pushState'](null, '', url);
+}
+nav.ruta = leerRuta();
+nav.ir = (url, { replace = false } = {}) => { ponerURL(url, replace); nav.ruta = leerRuta(); alCambiarRuta(); render(); window.scrollTo(0, 0); };
+window.addEventListener('popstate', () => { if (MEM) return; nav.ruta = leerRuta(); alCambiarRuta(); render(); });
+let navegado = false;
+function atras(porDefecto = '/') {
+  if (MEM) { if (pila.length > 1) { pila.pop(); nav.ruta = leerRuta(); alCambiarRuta(); render(); } else nav.ir(porDefecto, { replace: true }); return; }
+  navegado ? history.back() : nav.ir(porDefecto, { replace: true });
+}
+function alCambiarRuta() { navegado = true; if (nav.ruta.path !== '/nuevo') FN = null; if (!nav.ruta.path.startsWith('/encuentro/')) AE.clear(); }
+
+// ------------------------------------------------------------------ entrada (código + quién eres)
+const E = { info: null, error: '', ocupado: false, codigo: '' };
+
+function vistaEntrada() {
+  const demo = backend.modo === 'demo';
+  return `<main class="entrada">
+    <p class="logo-xl">f!t</p>
+    <h1 class="titulo-xl">RETO 29</h1>
+    <p class="sub">Una foto con cada una de las otras 29 personas del FIT 2026.</p>
+    ${E.info === null && !E.error ? `<p class="cargando"><span class="spin"></span> Conectando…</p>` : `
+    <form data-submit="entrar" class="form">
+      <label class="campo"><span>Código del reto</span>
+        <input name="codigo" type="text" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="El que venía en el WhatsApp" value="${esc(E.codigo)}" required></label>
+      ${E.error ? `<p class="error">${esc(E.error)}</p>` : ''}
+      <button class="cta" ${E.ocupado ? 'disabled' : ''}>${E.ocupado ? 'Comprobando…' : 'ENTRAR'}</button>
+      ${demo ? `<p class="nota">Modo demo (probando sin desplegar nada): el código es <b>demo</b>. Los datos solo se guardan en este dispositivo.</p>` : ''}
+    </form>`}
+  </main>`;
+}
+
+async function iniciarEntrada() {
+  const delEnlace = nav.ruta.q.get('c');
+  if (delEnlace) { ponerURL(nav.ruta.path, true); nav.ruta = leerRuta(); }  // el código no se queda en la barra
+  const candidato = delEnlace || S.codigo;
+  try {
+    if (candidato) { await entrar(candidato); return render(); }
+  } catch (e) {
+    if (e.code !== 'CODIGO_INVALIDO') { E.error = textoError(e); if (S.data) return; }
+    else { olvidarAcceso(); E.error = delEnlace ? 'El código del enlace ya no vale. Pide el nuevo.' : ''; }
+  }
+  try {
+    E.info = await backend.accessInfo();
+    if (!E.info.code_required) { await entrar(''); return render(); }
+  } catch (e) { E.info = {}; E.error = textoError(e); }
+  render();
+}
+
+acts.entrar = async (form) => {
+  E.codigo = form.codigo.value; E.error = ''; E.ocupado = true; render();
+  try { await entrar(E.codigo); } catch (e) { E.error = textoError(e); }
+  E.ocupado = false; render();
+};
+
+function vistaQuien(primera) {
+  return `${primera ? `<header class="top"><span class="marca"><b>f!t</b><span>Reto 29</span></span></header>` : cabeceraSub('¿Quién eres?')}
+  <main class="pag">
+    ${primera ? `<h1 class="h1">¿Quién eres?</h1><p class="sub">Se guarda en este teléfono para no preguntártelo más. Puedes cambiarlo cuando quieras.</p>` : ''}
+    <div class="grid-nombres">${D.gente.map((p) => `<button class="nombre ${p.id === S.yo ? 'sel' : ''} ${p.is_placeholder ? 'prov' : ''}" data-act="soy" data-id="${p.id}">${esc(p.display_name)}${p.is_placeholder ? '<small>provisional</small>' : ''}</button>`).join('')}</div>
+    ${!primera ? `<p class="centro"><a class="enlace" href="/admin" data-link>Administración</a></p>` : ''}
+  </main>`;
+}
+acts.soy = (el) => { elegirYo(el.dataset.id); if (nav.ruta.path === '/quien') nav.ir('/', { replace: true }); };
+
+// ------------------------------------------------------------------ marco común
+function cabecera() {
+  return `<header class="top">
+    <a class="marca" href="/" data-link aria-label="Inicio"><b>f!t</b><span>Reto 29</span></a>
+    <a class="chip-yo" href="/quien" data-link aria-label="Cambiar quién soy">${ico.yo}<span>${esc(nombre(S.yo))}</span></a>
+  </header>`;
+}
+function cabeceraSub(titulo, vuelta = '/') {
+  return `<header class="top sub-top"><button class="ic-btn" data-act="atras" data-a="${esc(vuelta)}" aria-label="Volver">${ico.atras}</button><h1>${esc(titulo)}</h1><span class="ic-btn"></span></header>`;
+}
+acts.atras = (el) => atras(el.dataset.a || '/');
+
+function barraNav() {
+  const p = nav.ruta.path;
+  const it = (href, icono, txt) => `<a href="${href}" data-link class="${p === href ? 'on' : ''}" ${p === href ? 'aria-current="page"' : ''}>${icono}<span>${txt}</span></a>`;
+  return `<nav class="nav" aria-label="Secciones">${it('/', ico.casa, 'Inicio')}${it('/mi-reto', ico.yo, 'Mi reto')}${it('/matriz', ico.matriz, 'Matriz')}${it('/ranking', ico.copa, 'Ranking')}</nav>`;
+}
+
+const nombresFoto = (e) => ordenNombres(e).map(nombreH).join(' <span class="x">×</span> ');
+const filaEncuentro = (e) => `<a class="fila" href="/encuentro/${e.id}" data-link>
+    ${img(e.thumb_path || e.photo_path, '', 'mini')}
+    <span class="fila-txt"><b>${nombresFoto(e)}</b>
+    <small>${e.place ? esc(e.place) + ' · ' : ''}${fmtCuando(e.occurred_at)}</small></span>${ico.flecha}</a>`;
+
+// ------------------------------------------------------------------ Inicio
+function vistaInicio() {
+  const n = D.cuenta.get(S.yo) || 0, t = D.total, pct = t ? Math.round((n / t) * 100) : 0;
+  const mios = misEncuentros(S.yo).slice(0, 3);
+  const falta = t - n;
+  return `${cabecera()}<main class="pag">
+    ${backend.modo === 'demo' ? `<p class="demo-b">Modo demo: nada sale de este dispositivo. <button class="enlace" data-act="demo-sembrar">Rellenar con ejemplos</button></p>` : ''}
+    <section class="prog" aria-label="Mi progreso">
+      <p class="prog-t">Mi progreso</p>
+      <p class="prog-n"><b>${n}</b><i>/ ${t}</i></p>
+      <div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="${t}" aria-valuenow="${n}"><span style="width:${pct}%"></span></div>
+      <p class="prog-s">${n === 0 ? 'Empieza por quien tengas al lado.' : falta === 0 ? '¡Reto completado! Tienes foto con todo el grupo.' : `Te ${falta === 1 ? 'falta 1 persona' : `faltan ${falta} personas`}.`}</p>
+    </section>
+    <a class="cta" href="/nuevo" data-link>${ico.camara} AÑADIR ENCUENTRO</a>
+    <h2 class="h2">Mis últimos encuentros</h2>
+    ${mios.length ? mios.slice(0, 3).map(filaEncuentro).join('') : `<p class="vacio">Aún no tienes ninguno. La primera foto es la más fácil.</p>`}
+  </main>${barraNav()}`;
+}
+
+// ------------------------------------------------------------------ Mi reto
+function vistaMiReto() {
+  const de = D.porId.get(nav.ruta.q.get('p'))?.compites && D.porId.get(nav.ruta.q.get('p'))?.active ? nav.ruta.q.get('p') : S.yo;
+  const n = D.cuenta.get(de) || 0;
+  const otros = D.gente.filter((p) => p.id !== de);
+  return `${cabecera()}<main class="pag">
+    <div class="reto-cab"><h1 class="h1">${de === S.yo ? 'Mi reto' : esc(nombre(de))}</h1><p class="reto-n"><b>${n}</b> / ${D.total}</p></div>
+    ${de !== S.yo ? `<p class="nota"><a href="/mi-reto" data-link>Volver a mi reto</a></p>` : ''}
+    <div class="grid-reto">${otros.map((p) => {
+      const e = encuentroDe(de, p.id);
+      return e
+        ? `<a class="tile hecho" href="/encuentro/${e.id}" data-link>${img(e.thumb_path || e.photo_path, '')}<span class="tick">${ico.check}</span><span class="tile-n">${esc(p.display_name)}</span></a>`
+        : `<a class="tile" href="/nuevo?a=${de}&b=${p.id}" data-link><span class="tile-mas">${ico.mas}</span><span class="tile-n">${esc(p.display_name)}</span></a>`;
+    }).join('')}</div>
+  </main>${barraNav()}`;
+}
+
+// ------------------------------------------------------------------ Matriz
+const MX = { mini: false, x: 0, y: 0, irA: null };
+function vistaMatriz() {
+  const g = D.gente, N = g.length;
+  let h = `<div class="mx-esq"></div>`;
+  h += g.map((p) => `<div class="mx-col ${p.id === S.yo ? 'yo' : ''}"><span>${esc(p.display_name)}</span></div>`).join('');
+  for (let i = 0; i < N; i++) {
+    h += `<div class="mx-fil ${g[i].id === S.yo ? 'yo' : ''}">${esc(g[i].display_name)}</div>`;
+    for (let j = 0; j < N; j++) {
+      if (i === j) { h += `<div class="c diag" aria-hidden="true"></div>`; continue; }
+      const e = D.parejas.get(pairKey(g[i].id, g[j].id));
+      const mio = g[i].id === S.yo || g[j].id === S.yo;
+      h += `<button class="c${e ? ' on' : ''}${mio ? ' mio' : ''}${e && e.quienes.length > 2 ? ' grupo' : ''}" data-act="celda" data-i="${i}" data-j="${j}" aria-label="${esc(g[i].display_name)} y ${esc(g[j].display_name)}: ${e ? 'hecho' : 'pendiente'}"></button>`;
+    }
+  }
+  return `${cabecera()}<main class="pag pag-mx">
+    <div class="mx-barra"><h1 class="h1">Matriz</h1>
+      <div class="seg" role="group" aria-label="Tamaño"><button class="${MX.mini ? '' : 'on'}" data-act="mx-modo" data-m="0">Táctil</button><button class="${MX.mini ? 'on' : ''}" data-act="mx-modo" data-m="1">Entera</button></div></div>
+    <p class="leyenda"><i class="ley on"></i> con foto <i class="ley"></i> pendiente <span>· ${D.parejas.size} de ${(N * (N - 1)) / 2} parejas</span></p>
+    <div class="mx-wrap ${MX.mini ? 'mini' : ''}" id="mx" style="--n:${N}"><div class="mx">${h}</div></div>
+  </main>${barraNav()}`;
+}
+acts['mx-modo'] = (el) => { MX.mini = el.dataset.m === '1'; MX.x = MX.y = 0; render(); };
+acts.celda = (el) => {
+  const i = +el.dataset.i, j = +el.dataset.j;
+  if (MX.mini) { MX.mini = false; MX.irA = [i, j]; return render(); }   // en la vista entera, tocar = acercarse a esa zona
+  const a = D.gente[i].id, b = D.gente[j].id, e = encuentroDe(a, b);
+  nav.ir(e ? `/encuentro/${e.id}` : `/nuevo?a=${a}&b=${b}`);
+};
+function trasMatriz() {
+  const w = document.getElementById('mx'); if (!w) return;
+  if (MX.irA) { const c = 44; w.scrollLeft = Math.max(0, MX.irA[1] * c - w.clientWidth / 3); w.scrollTop = Math.max(0, MX.irA[0] * c - w.clientHeight / 3); MX.irA = null; }
+  else { w.scrollLeft = MX.x; w.scrollTop = MX.y; }
+  w.addEventListener('scroll', () => { MX.x = w.scrollLeft; MX.y = w.scrollTop; }, { passive: true });
+}
+
+// ------------------------------------------------------------------ Ranking
+function vistaRanking() {
+  return `${cabecera()}<main class="pag">
+    <h1 class="h1">Ranking</h1>
+    <p class="sub">Personas distintas con las que ya tiene foto cada cual.</p>
+    <ol class="rank">${ranking().map((f) => `<li class="${f.p.id === S.yo ? 'yo' : ''}"><a href="/mi-reto?p=${f.p.id}" data-link><span class="puesto">${f.puesto}</span><span class="rk-n">${esc(f.p.display_name)}</span><span class="rk-v"><b>${f.n}</b>/${D.total}</span></a></li>`).join('')}</ol>
+  </main>${barraNav()}`;
+}
+
+// ------------------------------------------------------------------ Nuevo encuentro
+let FN = null;
+function estadoNuevo() {
+  if (!FN) {
+    const q = nav.ruta.q, okC = (id) => (D.gente.some((p) => p.id === id) ? id : null), okT = (id) => (D.todos.some((p) => p.id === id) ? id : null);
+    FN = { a: okC(q.get('a')) || S.yo, b: okT(q.get('b')) || '', mas: [], masAbierto: false, place: '', cuando: null, editarFecha: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, error: '', errFoto: '' };
+    if (FN.a === FN.b) FN.b = '';
+  }
+  return FN;
+}
+const grupoExistente = (ids) => { const set = new Set(ids); return S.data?.encounters.find((e) => e.participants.length === set.size && e.participants.every((id) => set.has(id))) || null; };
+function opcionesGente(sel, excluir) {
+  return D.todos.filter((p) => p.id !== excluir).map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''} ${p.compites ? '' : 'class="cursiva"'}>${esc(p.display_name)}</option>`).join('');
+}
+function vistaNuevo() {
+  const F = estadoNuevo();
+  const quienes = [F.a, F.b, ...F.mas].filter(Boolean);
+  const ya = F.a && F.b ? grupoExistente(quienes) || F.yaServidor : null;
+  const otrasPersonas = D.todos.filter((p) => ![F.a, F.b].includes(p.id));
+  const listo = F.a && F.b && F.blobs && !F.ocupado;
+  return `${cabeceraSub(ya ? 'Otra foto' : 'Nuevo encuentro')}<main class="pag">
+    <form class="form" data-submit="guardar-nuevo">
+      <div class="dos">
+        <label class="campo"><span>Soy</span><select data-ch="nuevo-a">${D.gente.map((p) => `<option value="${p.id}" ${p.id === F.a ? 'selected' : ''}>${esc(p.display_name)}</option>`).join('')}</select></label>
+        <label class="campo"><span>Me encontré con</span><select data-ch="nuevo-b">${opcionesGente(F.b, F.a)}</select></label>
+      </div>
+      ${F.b ? `<p class="mas-tog"><button type="button" class="enlace" data-act="nuevo-mas-tog">${F.masAbierto ? 'Ocultar' : '+ ¿Salió alguien más en la foto?'}</button></p>` : ''}
+      ${F.b && F.masAbierto ? `<div class="campo mas-lista">${otrasPersonas.map((p) => `<label class="chk"><input type="checkbox" data-ch="nuevo-mas" value="${p.id}" ${F.mas.includes(p.id) ? 'checked' : ''}> ${nombreH(p.id)}</label>`).join('')}</div>` : ''}
+      ${ya ? `<div class="aviso">${img(ya.thumb_path || ya.photo_path, '', 'mini')}<div><b>Ya tenéis esa foto${ya.status === 'pending' ? ' (pendiente de revisión)' : ''}.</b>
+        <small>Puedes añadir otra al mismo grupo. No cambia el progreso.</small>
+        ${ya.status !== 'pending' ? `<a href="/encuentro/${ya.id}" data-link>Ver el encuentro</a>` : ''}</div></div>` : ''}
+      <div class="campo"><span>Foto</span>${fotoPicker(F)}</div>
+      ${ya ? '' : `<label class="campo"><span>Lugar <em>opcional</em></span><input type="text" data-in="nuevo-lugar" value="${esc(F.place)}" maxlength="120" placeholder="¿Dónde fue?" autocomplete="off" enterkeyhint="done"></label>
+      ${F.editarFecha
+        ? `<label class="campo"><span>Fecha y hora</span><input type="datetime-local" data-in="nuevo-cuando" value="${esc(F.cuando || toLocalInput())}" max="${toLocalInput(new Date(Date.now() + 864e5))}"></label>`
+        : `<p class="cuando">Fecha y hora: <b>ahora</b> <button type="button" class="enlace" data-act="nuevo-fecha">Cambiar</button></p>`}`}
+      ${F.error ? `<p class="error">${esc(F.error)}</p>` : ''}
+      <div class="pie-form"><button class="cta" ${listo ? '' : 'disabled'}>${F.ocupado ? '<span class="spin"></span> Guardando…' : ya ? 'AÑADIR FOTO' : 'GUARDAR ENCUENTRO'}</button></div>
+    </form>
+  </main>`;
+}
+acts['nuevo-a'] = (el) => { FN.a = el.value; if (FN.b === FN.a) FN.b = ''; FN.mas = FN.mas.filter((id) => id !== FN.a); FN.yaServidor = null; render(); };
+acts['nuevo-b'] = (el) => { FN.b = el.value; FN.mas = FN.mas.filter((id) => id !== FN.b); FN.yaServidor = null; render(); };
+acts['nuevo-mas-tog'] = () => { FN.masAbierto = !FN.masAbierto; render(); };
+acts['nuevo-mas'] = (el) => { FN.mas = el.checked ? [...FN.mas, el.value] : FN.mas.filter((id) => id !== el.value); FN.yaServidor = null; render(); };
+acts['nuevo-lugar'] = (el) => { FN.place = el.value; };
+acts['nuevo-cuando'] = (el) => { FN.cuando = el.value; };
+acts['nuevo-fecha'] = () => { FN.editarFecha = true; FN.cuando = toLocalInput(); render(); };
+
+acts['guardar-nuevo'] = async () => {
+  const F = FN; if (!F || F.ocupado || !F.a || !F.b || !F.blobs) return;
+  const quienes = [...new Set([F.a, F.b, ...F.mas])];
+  F.ocupado = true; F.error = ''; render();
+  try {
+    const rutas = await subirSiHaceFalta(F, 'enc');
+    const ya = grupoExistente(quienes) || F.yaServidor;
+    if (ya) {
+      const f = await backend.addEncounterPhoto(S.codigo, ya.id, rutas);
+      aplicarLocal((d) => { d.encounter_photos.push(f); });
+      toast('Foto añadida'); FN = null; return nav.ir(`/encuentro/${ya.id}`, { replace: true });
+    }
+    const r = await backend.addEncounter(S.codigo, { quienes, ...rutas, place: F.place, occurred_at: F.editarFecha && F.cuando ? fromLocalInput(F.cuando) : new Date().toISOString() });
+    if (!r.created) {   // otro móvil la registró antes: no se duplica; se ofrece añadir la foto
+      F.yaServidor = r.encounter; F.ocupado = false;
+      if (r.encounter.status === 'published') aplicarLocal((d) => { if (!d.encounters.some((e) => e.id === r.encounter.id)) d.encounters.push(r.encounter); });
+      return render();
+    }
+    if (r.encounter.status === 'pending') { toast('Enviado. Aparecerá cuando lo revise el admin.', 4000); FN = null; return nav.ir('/', { replace: true }); }
+    aplicarLocal((d) => { d.encounters.push(r.encounter); });
+    toast(quienes.length > 2 ? '¡Hecho! Suma para todo el grupo' : `¡Hecho! Suma para ${nombre(F.a)} y para ${nombre(F.b)}`, 3200);
+    FN = null; nav.ir(`/encuentro/${r.encounter.id}`, { replace: true });
+  } catch (e) { F.error = textoError(e); F.ocupado = false; render(); }
+};
+acts.foto = (input) => manejarFoto(() => FN)(input);
+
+// ------------------------------------------------------------------ Detalle de encuentro
+// Foto adicional ("para que el álbum quede bonito"): sube directamente A ESTE encuentro, sin pasar por
+// /nuevo, para que nunca se pierda a nadie del grupo (una foto de 3+ personas no cabe en "a" + "b").
+const AE = new Map();
+const estadoAE = (id) => AE.get(id) || AE.set(id, { abierto: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, errFoto: '', error: '' }).get(id);
+
+function vistaEncuentro(id) {
+  const e = S.data.encounters.find((x) => x.id === id);
+  if (!e) return `${cabeceraSub('Encuentro')}<main class="pag"><p class="vacio">Este encuentro no existe o se ha borrado.</p><a class="btn" href="/" data-link>Ir a inicio</a></main>`;
+  const mas = D.fotosExtra.get(e.id) || [];
+  const quienes = ordenNombres({ quienes: e.participants });
+  const ae = estadoAE(e.id);
+  return `${cabeceraSub('Encuentro')}<main class="pag det">
+    <h2 class="det-n">${quienes.map(nombreH).join(' <span class="x">×</span> ')}</h2>
+    <p class="det-c">${fmtCuando(e.occurred_at)}${e.status === 'pending' ? ' · pendiente de revisión' : ''}</p>
+    <div class="det-foto">${img(e.photo_path, quienes.map((id) => nombre(id)).join(' y '))}</div>
+    ${mas.map((f) => `<div class="det-foto">${img(f.photo_path, 'Otra foto del encuentro')}${S.admin ? `<button class="btn btn-mini peligro" data-act="adm-borrar-foto" data-id="${f.id}">Borrar esta foto</button>` : ''}</div>`).join('')}
+    ${e.place ? `<p class="det-l">${ico.lugar}<span>${esc(e.place)}</span></p>` : ''}
+    ${e.note ? `<p class="det-nota">${esc(e.note)}</p>` : ''}
+    <p class="nota">Cuenta una vez para cada pareja del grupo, haya las fotos que haya.</p>
+    ${mas.length < 5 ? bloqueFotoExtra(e, ae) : ''}
+    ${S.admin ? `<div class="dos admin-acc"><a class="btn" href="/admin?e=${e.id}" data-link>Editar</a><button class="btn peligro" data-act="adm-borrar-enc" data-id="${e.id}">Eliminar</button></div>` : ''}
+  </main>`;
+}
+function bloqueFotoExtra(e, ae) {
+  if (!ae.abierto) return `<button type="button" class="btn" data-act="mostrar-mas-foto" data-id="${e.id}">${ico.camara} Añadir otra foto</button>`;
+  return `<div class="campo">${fotoPicker(ae, 'foto-extra')}</div>
+    ${ae.error ? `<p class="error">${esc(ae.error)}</p>` : ''}
+    <button type="button" class="btn" data-act="guardar-foto-extra" data-id="${e.id}" ${ae.blobs && !ae.ocupado ? '' : 'disabled'}>${ae.ocupado ? 'Guardando…' : 'Guardar foto'}</button>`;
+}
+acts['mostrar-mas-foto'] = (el) => { estadoAE(el.dataset.id).abierto = true; render(); };
+acts['foto-extra'] = (input) => { const id = nav.ruta.path.split('/')[2]; manejarFoto(() => estadoAE(id))(input); };
+acts['guardar-foto-extra'] = async (el) => {
+  const id = el.dataset.id, ae = estadoAE(id); if (!ae.blobs || ae.ocupado) return;
+  ae.ocupado = true; ae.error = ''; render();
+  try {
+    const rutas = await subirSiHaceFalta(ae, 'enc');
+    const f = await backend.addEncounterPhoto(S.codigo, id, rutas);
+    aplicarLocal((d) => { d.encounter_photos.push(f); });
+    AE.delete(id); toast('Foto añadida');
+  } catch (err) { ae.error = textoError(err); ae.ocupado = false; }
+  render();
+};
+
+// ------------------------------------------------------------------ render
+function render() {
+  const { path } = nav.ruta;
+  let html;
+  if (path === '/admin') html = vistaAdmin();
+  else if (!S.data) html = vistaEntrada();
+  else if (!S.yo) html = vistaQuien(true);
+  else if (path === '/') html = vistaInicio();
+  else if (path === '/mi-reto') html = vistaMiReto();
+  else if (path === '/matriz') html = vistaMatriz();
+  else if (path === '/ranking') html = vistaRanking();
+  else if (path === '/nuevo') html = vistaNuevo();
+  else if (path === '/quien') html = vistaQuien(false);
+  else if (path.startsWith('/encuentro/')) html = vistaEncuentro(path.split('/')[2]);
+  else { ponerURL('/', true); nav.ruta = leerRuta(); html = vistaInicio(); }
+  app.innerHTML = html;
+  document.body.dataset.ruta = path;
+  if (path === '/matriz') trasMatriz();
+  // Los <input type=file> escuchan directamente: si la pantalla se repinta con el selector de fotos abierto
+  // (input ya fuera del DOM), el evento no se pierde.
+  app.querySelectorAll('input[type=file][data-ch]').forEach((i) => i.addEventListener('change', (ev) => acts[i.dataset.ch]?.(i, ev)));
+}
+nav.render = render;
+
+// ------------------------------------------------------------------ eventos (delegación)
+document.addEventListener('click', (ev) => {
+  const a = ev.target.closest('a[data-link]');
+  if (a && (MEM || (!ev.metaKey && !ev.ctrlKey && !ev.shiftKey))) { ev.preventDefault(); const u = new URL(a.getAttribute('href'), 'http://x'); return nav.ir(u.pathname + u.search); }
+  const b = ev.target.closest('[data-act]');
+  if (b && !b.disabled && acts[b.dataset.act]) { if (b.tagName === 'BUTTON' && b.type !== 'submit') ev.preventDefault(); acts[b.dataset.act](b, ev); }
+});
+document.addEventListener('change', (ev) => { const k = ev.target.dataset?.ch; if (k && acts[k] && ev.target.type !== 'file') acts[k](ev.target, ev); });
+document.addEventListener('input', (ev) => { const k = ev.target.dataset?.in; if (k && acts[k]) acts[k](ev.target, ev); });
+document.addEventListener('submit', (ev) => { const k = ev.target.dataset?.submit; if (k) { ev.preventDefault(); acts[k]?.(ev.target, ev); } });
+
+// Refrescos en segundo plano: nunca pisan un formulario a medias.
+const enFormulario = () => ['/nuevo', '/admin'].includes(nav.ruta.path);
+alCambiar((motivo) => { if (['refresco', 'entrada'].includes(motivo) && S.yo && enFormulario()) return; render(); });
+const refrescoSilencioso = () => { if (S.data && document.visibilityState === 'visible') refrescar().catch((e) => { if (e.code === 'CODIGO_INVALIDO') { olvidarAcceso(); E.info = { code_required: true }; E.error = 'El código del reto ha cambiado. Pide el nuevo.'; render(); } }); };
+document.addEventListener('visibilitychange', refrescoSilencioso);
+window.addEventListener('online', refrescoSilencioso);
+setInterval(refrescoSilencioso, 45000);
+
+// ------------------------------------------------------------------ arranque
+(async function arrancar() {
+  if (backend.listo) await backend.listo;
+  if (S.codigo || !nav.ruta.q.get('c')) arrancarDesdeCache();      // pinta al instante con lo último visto
+  if (backend.haySesion()) S.admin = await backend.isAdmin();
+  render();
+  if (S.admin) { try { await refrescar('admin'); } catch { /* sin red */ } return render(); }   // el admin entra sin código
+  if (nav.ruta.path === '/admin') return;
+  await iniciarEntrada();
+})();
+
+})();</script></body></html>

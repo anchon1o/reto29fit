@@ -1,0 +1,15 @@
+import { chromium, devices } from 'playwright';
+const b = await chromium.launch(); const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage();
+await p.goto('http://localhost:5173'); await p.waitForSelector('input[name=codigo]'); await p.fill('input[name=codigo]', 'demo'); await p.click('button.cta');
+await p.waitForSelector('.nombre'); await p.locator('.nombre', { hasText: /^Ancho$/ }).click(); await p.waitForSelector('.prog');
+await p.goto('http://localhost:5173/nuevo'); await p.waitForSelector('select[data-ch="nuevo-b"]');
+await p.selectOption('select[data-ch="nuevo-b"]', { label: 'Fabián' });
+await p.click('[data-act="nuevo-mas-tog"]'); await p.waitForSelector('.mas-lista');
+await p.locator('.mas-lista .chk', { hasText: 'Harold' }).locator('input').check();
+const b64 = await p.evaluate(async () => { const c = document.createElement('canvas'); c.width=600;c.height=800; const g=c.getContext('2d'); g.fillStyle='#356'; g.fillRect(0,0,600,800); return c.toDataURL('image/jpeg',0.9).split(',')[1]; });
+const fs = await import('fs'); fs.writeFileSync('/tmp/g3.jpg', Buffer.from(b64,'base64'));
+await p.locator('input[type=file]:not([capture])').first().setInputFiles('/tmp/g3.jpg'); await p.waitForSelector('.foto-prev img');
+await p.click('button.cta'); await p.waitForURL(/\/encuentro\//);
+await p.click('[data-act="mostrar-mas-foto"]');
+await p.screenshot({ path: 'vis1.png' });
+await b.close();

@@ -1,0 +1,15 @@
+import { chromium, devices } from 'playwright';
+const b = await chromium.launch(); const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage();
+await p.goto('http://localhost:5173'); await p.waitForSelector('input[name=codigo]'); await p.fill('input[name=codigo]', 'demo'); await p.click('button.cta');
+await p.waitForSelector('.nombre'); await p.locator('.nombre', { hasText: /^Ancho$/ }).click(); await p.waitForSelector('.prog');
+await p.goto('http://localhost:5173/nuevo'); await p.waitForSelector('select[data-ch="nuevo-b"]');
+await p.selectOption('select[data-ch="nuevo-b"]', { label: 'Cou' });
+const style = await p.evaluate(() => getComputedStyle(document.querySelector('select[data-ch="nuevo-b"] option:checked')).fontStyle);
+console.log('option fontStyle (no aplica en móvil casi nunca):', style);
+const b64 = await p.evaluate(async () => { const c = document.createElement('canvas'); c.width=800;c.height=800; const g=c.getContext('2d'); g.fillStyle='#333'; g.fillRect(0,0,800,800); return c.toDataURL('image/jpeg',0.9).split(',')[1]; });
+const fs = await import('fs'); fs.writeFileSync('/tmp/small.jpg', Buffer.from(b64,'base64'));
+await p.locator('input[type=file]:not([capture])').first().setInputFiles('/tmp/small.jpg'); await p.waitForSelector('.foto-prev img');
+await p.click('button.cta'); await p.waitForURL(/\/encuentro\//);
+const s2 = await p.evaluate(() => getComputedStyle(document.querySelector('.det-n i')).fontStyle);
+console.log('detalle <i> fontStyle:', s2);
+await b.close();
