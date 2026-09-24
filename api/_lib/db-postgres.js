@@ -1,7 +1,43 @@
-// Adaptador real: Vercel Postgres (Neon). Misma interfaz que db-memoria.js.
-// NO se ha podido probar contra una base de datos real en este entorno (sin red). Antes de confiar en él:
-// desplegar, ejecutar tests/comprobacion-manual.md y revisar los logs de la función en Vercel.
-import { sql } from '@vercel/postgres';
+// Adaptador real de base de datos. Misma interfaz que db-memoria.js (probada de verdad en
+// tests/logica.test.mjs). Usa el paquete genérico 'pg' en vez de '@vercel/postgres': Vercel Postgres
+// (el producto nativo, con Neon por debajo) se DESCONTINUÓ en 2025 — ahora Storage → Create Database
+// ofrece integraciones de terceros (Prisma Postgres, Neon, Supabase…), cada una con su propio nombre de
+// variable de entorno. 'pg' habla el protocolo de Postgres sin más, así que funciona con cualquiera de
+// ellas mientras haya una cadena de conexión en alguna de las variables que se buscan abajo.
+//
+// NO se ha podido probar contra una base de datos real en este entorno (sin red). Antes de confiar en
+// él: desplegar, abrir la web, y revisar los logs de la función en Vercel si algo falla.
+import pg from 'pg';
+
+const { Pool } = pg;
+
+function cadenaConexion() {
+  const c = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING;
+  if (!c) throw new Error('Falta la cadena de conexión a Postgres: define DATABASE_URL (o POSTGRES_URL) en las variables de entorno del proyecto en Vercel.');
+  return c;
+}
+
+let pool;
+function getPool() {
+  if (!pool) {
+    const connectionString = cadenaConexion();
+    // La mayoría de proveedores serverless (Prisma Postgres, Neon, Supabase) exigen TLS; si la propia
+    // cadena ya trae sslmode=disable, se respeta tal cual.
+    const ssl = /sslmode=disable/i.test(connectionString) ? false : { rejectUnauthorized: false };
+    pool = new Pool({ connectionString, ssl, max: 3 });
+  }
+  return pool;
+}
+
+// Pequeña plantilla con etiqueta al estilo del 'sql' de @vercel/postgres, para no tener que reescribir
+// cada consulta a mano: sql`select * from x where id = ${id}` → pool.query('select * from x where id = $1', [id])
+function sql(strings, ...values) {
+  let text = strings[0];
+  const params = [];
+  values.forEach((v, i) => { params.push(v); text += `$${params.length}` + strings[i + 1]; });
+  return getPool().query(text, params);
+}
+sql.query = (text, params) => getPool().query(text, params);
 
 const SQL_ESQUEMA = `
 create extension if not exists pgcrypto;
@@ -56,7 +92,7 @@ export function crearDbPostgres() {
                     values (${p.display_name}, ${p.sort_name}, ${p.is_placeholder}, ${p.compites})
                     on conflict (display_name) do nothing`;
         }
-      })());
+      })().catch((e) => { listo = null; throw e; }));
     },
     async settings() { const { rows } = await sql`select * from settings where id`; return rows[0]; },
     async estado(admin) {

@@ -4,6 +4,6 @@
 // el frontend habla con /api/reto29 en el mismo dominio. API_BASE solo hace falta si la
 // función vive en otro dominio.
 window.RETO29_CONFIG = {
-  MODO: "real",
+  MODO: "demo",
   API_BASE: "",
 };

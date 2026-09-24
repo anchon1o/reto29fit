@@ -34,7 +34,14 @@ el ranking ni en "¿Quién eres?", y su nombre se muestra siempre **en cursiva**
   `api/_lib/logica.js` — la lógica de negocio, sin nada de Vercel dentro (recibe `db` y `blobs` como
   parámetros). Esto permite probarla de verdad sin red: `tests/logica.test.mjs` la ejecuta contra
   `api/_lib/db-memoria.js`, un doble en memoria con la MISMA interfaz que el adaptador real.
-- **Datos**: Vercel Postgres (Neon), adaptador en `api/_lib/db-postgres.js`.
+- **Datos**: Postgres, adaptador en `api/_lib/db-postgres.js`, con el paquete genérico `pg` (no
+  `@vercel/postgres`: ese producto nativo, con Neon por debajo, se **descontinuó en 2025**; ahora
+  Storage → Create Database ofrece integraciones de terceros — Prisma Postgres, Neon, Supabase… —, cada
+  una con su propio nombre de variable de entorno). `pg` habla el protocolo de Postgres sin más, así que
+  sirve para cualquiera de ellas: el adaptador busca la cadena de conexión en `DATABASE_URL` (lo que pone
+  Prisma Postgres) y, si no está, en `POSTGRES_URL` / `POSTGRES_PRISMA_URL` / `POSTGRES_URL_NON_POOLING`
+  (nombres que usan otras integraciones). Basta con conectar cualquiera de ellas desde Storage; no hace
+  falta tocar el código.
 - **Fotos**: Vercel Blob, adaptador en `api/_lib/blobs-vercel.js`. Se comprimen en el móvil antes de subir
   (1600 px, ~300 KB) y viajan como base64 dentro del JSON — más simple y fiable en móvil que un flujo de
   subida en dos pasos; por eso el límite de compresión es algo más estricto (1,5 MB) que si fuera binario
@@ -46,8 +53,9 @@ el ranking ni en "¿Quién eres?", y su nombre se muestra siempre **en cursiva**
 
 ## Puesta en marcha (~10 min)
 1. En [vercel.com](https://vercel.com), crea un proyecto a partir de este repositorio.
-2. **Storage → Create → Postgres** (Neon) y **Storage → Create → Blob**: conéctalos al proyecto. Vercel
-   añade solas las variables `POSTGRES_URL` y `BLOB_READ_WRITE_TOKEN`.
+2. **Storage → Create Database**: elige la que te ofrezca (Prisma Postgres, Neon, Supabase… cualquiera
+   vale, el código se adapta solo) y conéctala al proyecto — añade sola `DATABASE_URL` o similar. Repite
+   con **Storage → Create → Blob** — añade sola `BLOB_READ_WRITE_TOKEN`.
 3. **Settings → Environment Variables**, añade:
    - `ADMIN_PASSWORD`: la contraseña de administración (mínimo 8 caracteres).
    - `CODIGO_RETO`: el código que se compartirá por WhatsApp (opcional; sin él, entrada libre).
@@ -61,24 +69,29 @@ el ranking ni en "¿Quién eres?", y su nombre se muestra siempre **en cursiva**
 `MODO: "real"`: el frontend habla directamente con `/api/reto29` en el mismo dominio.
 
 ## Qué se ha probado y qué no
-Tres baterías, las tres en verde:
+Cuatro baterías, las cuatro en verde:
 1. **`node tests/logica.test.mjs`** — prueba `api/_lib/logica.js` **de verdad** (no un simulacro del
    propio código) contra `db-memoria.js`: fotos de grupo cubriendo todas las parejas a la vez, no
    duplicar el mismo grupo, hasta 5 fotos extra y la 6ª rechazada, login/token/permisos de admin,
    validaciones (participante inválido, JPEG falso, etc).
-2. **`tests/e2e.mjs`** (Playwright, Chromium emulando iPhone, modo demo vía `dev_server.py`) — el flujo
+2. **`node tests/db-postgres.test.mjs`** — prueba que `db-postgres.js` genera el SQL correcto: cada
+   `${valor}` de la plantilla se convierte en el `$N` correcto y en el orden correcto, contra un doble
+   mínimo de `pg` (sin base de datos real). Si no existe `node_modules/pg` en tu entorno, créalo primero
+   con `node tests/instalar-stub-pg.mjs` (con un `npm install` normal no hace falta: ya tendrás el `pg`
+   de verdad, y esta prueba sigue funcionando igual porque solo mira el texto SQL que se genera).
+3. **`tests/e2e.mjs`** (Playwright, Chromium emulando iPhone, modo demo vía `dev_server.py`) — el flujo
    completo en el navegador: foto de 3 personas, verlo desde cualquiera de los tres, matriz con la marca
    de "foto de grupo", profes en cursiva y sin sumar al 29, admin quitando a alguien de una foto de grupo,
    anchuras 360/390/430 sin desbordes ni objetivos táctiles pequeños.
-3. **`tests/bundle.mjs`** — el HTML único (`dist/reto29-demo.html`) dentro de un iframe aislado con
+4. **`tests/bundle.mjs`** — el HTML único (`dist/reto29-demo.html`) dentro de un iframe aislado con
    `localStorage` bloqueado (como una vista previa incrustada), para comprobar que no se rompe sin
    almacenamiento persistente.
 
 Ejecutar todo: `tests/run.sh` (arranca `dev_server.py`, corre `e2e.mjs`, para el servidor).
 
-**No probado, porque este entorno no tiene red**: `db-postgres.js` y `blobs-vercel.js` contra un Vercel
-real. Están escritos siguiendo la interfaz que `logica.js` espera (la misma que `db-memoria.js`, ya
-probada), pero antes de confiar en ellos del todo:
+**No probado, porque este entorno no tiene red**: `db-postgres.js` y `blobs-vercel.js` contra un Postgres
+y un Blob reales. El SQL que generan está probado (punto 2 de arriba) y la interfaz es la misma que
+`db-memoria.js` (ya probada a fondo), pero antes de confiar en ellos del todo:
 1. Desplegar y abrir la web: el primer `get_state` debe crear las tablas solo (revisar logs de la función
    en Vercel si no aparecen los 33 participantes).
 2. Añadir un encuentro de 2 y otro de 3 personas con fotos reales desde un iPhone (cámara y galería).
@@ -98,8 +111,10 @@ js/backend-demo.js    mismo interfaz en localStorage (modo demo)
 js/image.js  js/ui.js  js/util.js
 api/reto29.js               única función serverless
 api/_lib/logica.js          lógica de negocio (sin nada de Vercel dentro)
-api/_lib/db-postgres.js     adaptador real (Neon)      api/_lib/blobs-vercel.js   adaptador real (Blob)
+api/_lib/db-postgres.js     adaptador real, con 'pg' (vale para Prisma Postgres, Neon, Supabase…)
+api/_lib/blobs-vercel.js    adaptador real de fotos (Vercel Blob)
 api/_lib/db-memoria.js      doble en memoria, para pruebas
-tests/logica.test.mjs  e2e.mjs  bundle.mjs  run.sh
+api/_lib/_stubs/pg-stub.cjs doble mínimo de 'pg', para probar el SQL generado sin base de datos
+tests/logica.test.mjs  db-postgres.test.mjs  e2e.mjs  bundle.mjs  run.sh  instalar-stub-pg.mjs
 tools/bundle.py → dist/reto29-demo.html
 ```
