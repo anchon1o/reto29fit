@@ -105,7 +105,7 @@ const fg = await fotoGrande(page, '_fotoGrupo3.jpg', '#119933');
 await (await foto()).setInputFiles(fg); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 const urlGrupo3 = page.url();
 await page.click('[data-act="mostrar-mas-foto"]'); await (await foto()).setInputFiles(fg); await page.waitForSelector('.foto-prev img'); await page.click('[data-act="guardar-foto-extra"]');
-await page.waitForSelector('.det-foto:nth-child(4)');
+await page.waitForFunction(() => document.querySelectorAll('.det-foto').length === 2);
 ok(page.url() === urlGrupo3, 'la foto extra se queda en el MISMO encuentro de 3 personas (no navega a /nuevo)');
 ok((await txt('.det-n')).includes('Fabián') && (await txt('.det-n')).includes('Harold'), 'el encabezado sigue mostrando a los 3, no solo a los 2 primeros');
 await page.goto(URL_ + '/matriz'); await page.waitForSelector('.mx');

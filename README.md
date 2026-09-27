@@ -51,13 +51,33 @@ el ranking ni en "¿Quién eres?", y su nombre se muestra siempre **en cursiva**
   permiso especial: todo pasa por `logica.js`, que valida el código del reto en cada alta y exige el
   token en cada acción de admin.
 
+## Prefijo FIT: convive con otras apps sin chocar
+Todo lo que podría coincidir con otros proyectos lleva prefijo:
+- **Tablas**: `fit_participants`, `fit_encounters`, `fit_encounter_participants`, `fit_encounter_photos`,
+  `fit_settings`. Si la base de datos tenía las tablas de versiones anteriores sin prefijo, se renombran solas
+  al arrancar, en una transacción, **solo si se comprueba que son de esta app** (por sus columnas propias).
+  Tablas ajenas que se llamen `participants` o `settings` no se tocan nunca.
+- **Fotos**: carpeta `fit/` del almacén Blob. Las fotos subidas antes (en `enc/`) siguen funcionando.
+- **Variables de entorno**: se buscan primero con prefijo y, si no están, con el nombre normal:
+
+| Para qué | Con prefijo (preferente) | Sin prefijo |
+|---|---|---|
+| Contraseña de admin | `FIT_ADMIN_PASSWORD` | `ADMIN_PASSWORD` |
+| Código inicial del reto | `FIT_CODIGO_RETO` | `CODIGO_RETO` (si no hay ninguna: `Fitiñas26`) |
+| Base de datos | `FIT_DATABASE_URL`, `FIT_POSTGRES_URL`, `FIT_URL` | `DATABASE_URL`, `POSTGRES_URL`… |
+| Fotos (Blob) | `FIT_BLOB_READ_WRITE_TOKEN`, `FIT_READ_WRITE_TOKEN` | `BLOB_READ_WRITE_TOKEN` |
+
+Si al conectar la base de datos o el Blob en Vercel escribes `FIT` en «Custom Prefix», la app encuentra las
+variables sola. Solo se aceptan cadenas de conexión que empiecen por `postgres://` (se ignora, por ejemplo,
+la de Prisma Accelerate, `prisma+postgres://`, que no sirve para una conexión directa).
+
 ## Puesta en marcha (~10 min)
 1. En [vercel.com](https://vercel.com), crea un proyecto a partir de este repositorio.
 2. **Storage → Create Database**: elige la que te ofrezca (Prisma Postgres, Neon, Supabase… cualquiera
    vale, el código se adapta solo) y conéctala al proyecto — añade sola `DATABASE_URL` o similar. Repite
    con **Storage → Create → Blob** — añade sola `BLOB_READ_WRITE_TOKEN`.
 3. **Settings → Environment Variables**, añade:
-   - `ADMIN_PASSWORD`: la contraseña de administración (mínimo 8 caracteres).
+   - `FIT_ADMIN_PASSWORD` (o `ADMIN_PASSWORD`): la contraseña de administración (mínimo 8 caracteres).
    - `ADMIN_PASSWORD` **tiene que ser distinta del código del reto**: si fueran iguales, cualquiera con el
      código sería admin, así que el panel se niega a abrir en ese caso.
    - El código de acceso es **`Fitiñas26`** por defecto (no distingue mayúsculas; la ñ sí cuenta). Solo

@@ -41,7 +41,7 @@ export const kv = {
   set(k, v, tipo = 'local') { try { if (!cajas[tipo]) { v == null ? mem.delete(k) : mem.set(k, v); return true; } v == null ? cajas[tipo].removeItem(k) : cajas[tipo].setItem(k, v); return true; } catch { return false; } },
 };
 
-export const VERSION_WEB = '8';
+export const VERSION_WEB = '8.2';
 
 let toastT;
 export function toast(msg, ms = 2600) {
@@ -61,7 +61,7 @@ export const ERRORES = {
   NO_ADMIN: 'Esta cuenta no tiene permisos de administración.',
   RED: 'Sin conexión. Comprueba los datos o el wifi y vuelve a intentarlo.',
   LOGIN: 'Contraseña incorrecta.',
-  ADMIN_NO_CONFIGURADO: 'Falta la variable ADMIN_PASSWORD en Vercel (mínimo 8 caracteres).',
+  ADMIN_NO_CONFIGURADO: 'Falta la variable FIT_ADMIN_PASSWORD (o ADMIN_PASSWORD) en Vercel, con mínimo 8 caracteres.',
   ADMIN_IGUAL_CODIGO: 'La contraseña de administración no puede ser igual al código del reto: cámbiala en Vercel (ADMIN_PASSWORD).',
   DUPLICADO: 'Ya existe un registro igual (pareja o nombre repetido).',
   EN_USO: 'No se puede borrar porque tiene encuentros asociados. Desactívalo o borra antes sus encuentros.',

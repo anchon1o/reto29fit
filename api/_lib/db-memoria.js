@@ -55,7 +55,7 @@ export function crearDbMemoria() {
 }
 
 export function crearBlobsMemoria() {
-  const RUTA = /^enc\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(_t)?\.jpg$/;
+  const RUTA = /^(fit\/)?enc\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(_t)?\.jpg$/;
   const mem = new Map();
   return {
     valida: (p) => RUTA.test(String(p || '')),

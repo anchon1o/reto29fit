@@ -16,7 +16,7 @@ http.createServer(async (req, res) => {
     const r = await atender({ fn: j.fn, args: j.args, code: j.code, token: req.headers['x-admin-token'] });
     res.writeHead(r.status, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify(r.body));
   }
-  const foto = url.pathname.match(/enc\/[^/]+\.jpg$/)?.[0];   // en local la ruta es relativa; en Vercel Blob es una URL completa
+  const foto = url.pathname.match(/(fit\/)?enc\/[^/]+\.jpg$/)?.[0];   // en local la ruta es relativa; en Vercel Blob es una URL completa
   if (foto && blobs._mem.has(foto)) { res.writeHead(200, { 'Content-Type': 'image/jpeg' }); return res.end(blobs._mem.get(foto)); }
   let f = path.join(raiz, url.pathname); if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) f = path.join(raiz, 'index.html');
   res.writeHead(200, { 'Content-Type': tipos[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-store' }); fs.createReadStream(f).pipe(res);

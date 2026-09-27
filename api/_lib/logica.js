@@ -14,7 +14,7 @@ export const SEMILLA = {
 
 // Código de acceso del reto al crear la base de datos. Se comparte por WhatsApp, así que no es secreto.
 // Después se cambia desde /admin → Ajustes. No distingue mayúsculas.
-export const VERSION = '8';          // se muestra al pie de «¿Quién eres?» para saber qué hay desplegado
+export const VERSION = '8.2';          // se muestra al pie de «¿Quién eres?» para saber qué hay desplegado
 export const CODIGO_POR_DEFECTO = 'Fitiñas26';
 
 export const hashCodigo = (c) => crypto.createHash('sha256').update(String(c ?? '').trim().toLowerCase(), 'utf8').digest('hex');
@@ -35,7 +35,7 @@ const EDITABLE = {
 
 export function crearLogica({ db, blobs, env }) {
   // ---- sesión de admin: token firmado (HMAC), sin tabla de usuarios ----
-  const pass = () => String(env.ADMIN_PASSWORD || '');
+  const pass = () => String(env.FIT_ADMIN_PASSWORD || env.ADMIN_PASSWORD || '');   // FIT_ primero, para no chocar con otras apps
   const secreto = () => crypto.createHash('sha256').update('reto29|' + pass()).digest();
   const firmar = (exp) => crypto.createHmac('sha256', secreto()).update(String(exp)).digest('hex');
   const crearToken = () => { const exp = Date.now() + 12 * 3600e3; return `${exp}.${firmar(exp)}`; };
@@ -48,7 +48,7 @@ export function crearLogica({ db, blobs, env }) {
   }
 
   let listo;
-  const preparar = () => (listo ||= db.init({ semilla: SEMILLA, hashInicial: hashCodigo(env.CODIGO_RETO || CODIGO_POR_DEFECTO) }).catch((e) => { listo = null; throw e; }));
+  const preparar = () => (listo ||= db.init({ semilla: SEMILLA, hashInicial: hashCodigo(env.FIT_CODIGO_RETO || env.CODIGO_RETO || CODIGO_POR_DEFECTO) }).catch((e) => { listo = null; throw e; }));
 
   async function exigirAcceso(ctx) {
     if (ctx.admin) return;
@@ -83,7 +83,7 @@ export function crearLogica({ db, blobs, env }) {
       await exigirAcceso(ctx);
       if (a.tipo !== 'enc') throw fallo('RUTA_FOTO_INVALIDA');
       const foto = jpeg(a.photo), mini = jpeg(a.thumb), id = crypto.randomUUID();
-      const [photo_path, thumb_path] = await Promise.all([blobs.put(`enc/${id}.jpg`, foto), blobs.put(`enc/${id}_t.jpg`, mini)]);
+      const [photo_path, thumb_path] = await Promise.all([blobs.put(`fit/enc/${id}.jpg`, foto), blobs.put(`fit/enc/${id}_t.jpg`, mini)]);
       return { photo_path, thumb_path };
     },
 
