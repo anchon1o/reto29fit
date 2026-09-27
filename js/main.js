@@ -1,4 +1,4 @@
-import { esc, fmtCuando, toLocalInput, fromLocalInput, toast, textoError, pairKey } from './util.js';
+import { esc, fmtCuando, toLocalInput, fromLocalInput, toast, textoError, pairKey, VERSION_WEB } from './util.js';
 import { S, D, backend, nombre, compite, encuentroDe, misEncuentros, ordenNombres, ranking, alCambiar, arrancarDesdeCache, refrescar, entrar, elegirYo, olvidarAcceso, aplicarLocal } from './store.js';
 import { acts, nav, ico, fotoPicker, manejarFoto, subirSiHaceFalta, confirmar, img, nombreH } from './ui.js';
 import { vistaAdmin } from './admin.js';
@@ -36,7 +36,7 @@ function vistaEntrada() {
   return `<main class="entrada">
     <p class="logo-xl">f!t</p>
     <h1 class="titulo-xl">RETO 29</h1>
-    <p class="sub">Una foto con cada una de las otras 29 personas del FIT 2026.</p>
+    <p class="sub">Una foto con cada persona del grupo del FIT 2026.</p>
     ${E.info === null && !E.error ? `<p class="cargando"><span class="spin"></span> Conectando…</p>` : `
     <form data-submit="entrar" class="form">
       <label class="campo"><span>Código del reto</span>
@@ -71,12 +71,16 @@ acts.entrar = async (form) => {
   E.ocupado = false; render();
 };
 
+const botonNombre = (p) => `<button class="nombre ${p.id === S.yo ? 'sel' : ''} ${p.is_placeholder ? 'prov' : ''} ${p.compites ? '' : 'cursiva'}" data-act="soy" data-id="${p.id}">${esc(p.display_name)}${p.is_placeholder ? '<small>provisional</small>' : ''}</button>`;
 function vistaQuien(primera) {
+  const profes = D.todos.filter((p) => !p.compites);
   return `${primera ? `<header class="top"><span class="marca"><b>f!t</b><span>Reto 29</span></span></header>` : cabeceraSub('¿Quién eres?')}
   <main class="pag">
     ${primera ? `<h1 class="h1">¿Quién eres?</h1><p class="sub">Se guarda en este teléfono para no preguntártelo más. Puedes cambiarlo cuando quieras.</p>` : ''}
-    <div class="grid-nombres">${D.gente.map((p) => `<button class="nombre ${p.id === S.yo ? 'sel' : ''} ${p.is_placeholder ? 'prov' : ''}" data-act="soy" data-id="${p.id}">${esc(p.display_name)}${p.is_placeholder ? '<small>provisional</small>' : ''}</button>`).join('')}</div>
+    <div class="grid-nombres">${D.gente.map(botonNombre).join('')}</div>
+    ${profes.length ? `<h2 class="h2">Profes <em class="nota-in">no compiten, pero pueden subir fotos</em></h2><div class="grid-nombres">${profes.map(botonNombre).join('')}</div>` : ''}
     ${!primera ? `<p class="centro"><a class="enlace" href="/admin" data-link>Administración</a></p>` : ''}
+    <p class="version">web v${VERSION_WEB} · servidor v${esc(S.data?.settings?.version || '?')}</p>
   </main>`;
 }
 acts.soy = (el) => { elegirYo(el.dataset.id); if (nav.ruta.path === '/quien') nav.ir('/', { replace: true }); };
@@ -85,7 +89,7 @@ acts.soy = (el) => { elegirYo(el.dataset.id); if (nav.ruta.path === '/quien') na
 function cabecera() {
   return `<header class="top">
     <a class="marca" href="/" data-link aria-label="Inicio"><b>f!t</b><span>Reto 29</span></a>
-    <a class="chip-yo" href="/quien" data-link aria-label="Cambiar quién soy">${ico.yo}<span>${esc(nombre(S.yo))}</span></a>
+    <a class="chip-yo" href="/quien" data-link aria-label="Cambiar quién soy">${ico.yo}<span>${nombreH(S.yo)}</span></a>
   </header>`;
 }
 function cabeceraSub(titulo, vuelta = '/') {
@@ -112,12 +116,12 @@ function vistaInicio() {
   const falta = t - n;
   return `${cabecera()}<main class="pag">
     ${backend.modo === 'demo' ? `<p class="demo-b">Modo demo: nada sale de este dispositivo. <button class="enlace" data-act="demo-sembrar">Rellenar con ejemplos</button></p>` : ''}
-    <section class="prog" aria-label="Mi progreso">
+    ${!compite(S.yo) ? `<section class="prog"><p class="prog-t">Profe · no compites</p><p class="prog-n"><b>${misEncuentros(S.yo).length}</b><i>${misEncuentros(S.yo).length === 1 ? 'foto' : 'fotos'}</i></p><p class="prog-s">Sales en el álbum, pero no cuentas para el reto de nadie.</p></section>` : `<section class="prog" aria-label="Mi progreso">
       <p class="prog-t">Mi progreso</p>
       <p class="prog-n"><b>${n}</b><i>/ ${t}</i></p>
       <div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="${t}" aria-valuenow="${n}"><span style="width:${pct}%"></span></div>
       <p class="prog-s">${n === 0 ? 'Empieza por quien tengas al lado.' : falta === 0 ? '¡Reto completado! Tienes foto con todo el grupo.' : `Te ${falta === 1 ? 'falta 1 persona' : `faltan ${falta} personas`}.`}</p>
-    </section>
+    </section>`}
     <a class="cta" href="/nuevo" data-link>${ico.camara} AÑADIR ENCUENTRO</a>
     <h2 class="h2">Mis últimos encuentros</h2>
     ${mios.length ? mios.slice(0, 3).map(filaEncuentro).join('') : `<p class="vacio">Aún no tienes ninguno. La primera foto es la más fácil.</p>`}
@@ -126,6 +130,12 @@ function vistaInicio() {
 
 // ------------------------------------------------------------------ Mi reto
 function vistaMiReto() {
+  if (!compite(S.yo) && !nav.ruta.q.get('p')) {
+    const mias = misEncuentros(S.yo);
+    return `${cabecera()}<main class="pag"><div class="reto-cab"><h1 class="h1">Mis fotos</h1><p class="reto-n"><b>${mias.length}</b></p></div>
+      ${mias.length ? `<div class="grid-reto">${mias.map((e) => `<a class="tile hecho" href="/encuentro/${e.id}" data-link>${img(e.thumb_path || e.photo_path, '')}<span class="tile-n">${ordenNombres(e).filter((id) => id !== S.yo).map((id) => esc(nombre(id))).join(', ')}</span></a>`).join('')}</div>` : '<p class="vacio">Aún no sales en ninguna foto.</p>'}
+    </main>${barraNav()}`;
+  }
   const de = D.porId.get(nav.ruta.q.get('p'))?.compites && D.porId.get(nav.ruta.q.get('p'))?.active ? nav.ruta.q.get('p') : S.yo;
   const n = D.cuenta.get(de) || 0;
   const otros = D.gente.filter((p) => p.id !== de);
@@ -190,54 +200,60 @@ function vistaRanking() {
 let FN = null;
 function estadoNuevo() {
   if (!FN) {
-    const q = nav.ruta.q, okC = (id) => (D.gente.some((p) => p.id === id) ? id : null), okT = (id) => (D.todos.some((p) => p.id === id) ? id : null);
-    FN = { a: okC(q.get('a')) || S.yo, b: okT(q.get('b')) || '', mas: [], masAbierto: false, place: '', cuando: null, editarFecha: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, error: '', errFoto: '' };
-    if (FN.a === FN.b) FN.b = '';
+    const q = nav.ruta.q, ok = (id) => (D.todos.some((p) => p.id === id) ? id : null);
+    FN = { a: ok(q.get('a')) || S.yo, con: [], place: '', cuando: null, editarFecha: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, error: '', errFoto: '' };
+    const b = ok(q.get('b')); if (b && b !== FN.a) FN.con = [b];
   }
   return FN;
 }
 const grupoExistente = (ids) => { const set = new Set(ids); return S.data?.encounters.find((e) => e.participants.length === set.size && e.participants.every((id) => set.has(id))) || null; };
-function opcionesGente(sel, excluir) {
-  return D.todos.filter((p) => p.id !== excluir).map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''} ${p.compites ? '' : 'class="cursiva"'}>${esc(p.display_name)}</option>`).join('');
+function opcionesGente(sel) {
+  return D.todos.map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''}>${esc(p.display_name)}${p.compites ? '' : ' (profe)'}</option>`).join('');
+}
+// "¿Con quién?": rejilla de nombres, se pueden marcar varias personas (foto de grupo).
+// ✓ = ya tienes foto con esa persona (para encontrar rápido a quien te falta).
+function chipsCon(F) {
+  const chip = (p) => {
+    const on = F.con.includes(p.id), hecho = compite(F.a) && p.compites && encuentroDe(F.a, p.id);
+    return `<button type="button" class="chip ${on ? 'on' : ''} ${p.compites ? '' : 'cursiva'} ${hecho ? 'hecho' : ''}" data-act="nuevo-con" data-id="${p.id}" data-nombre="${esc(p.display_name)}" aria-pressed="${on}">${esc(p.display_name)}</button>`;
+  };
+  const otros = D.todos.filter((p) => p.id !== F.a);
+  return `<div class="chips">${otros.filter((p) => p.compites).map(chip).join('')}</div>
+    ${otros.some((p) => !p.compites) ? `<p class="chips-t">Profes</p><div class="chips">${otros.filter((p) => !p.compites).map(chip).join('')}</div>` : ''}`;
 }
 function vistaNuevo() {
   const F = estadoNuevo();
-  const quienes = [F.a, F.b, ...F.mas].filter(Boolean);
-  const ya = F.a && F.b ? grupoExistente(quienes) || F.yaServidor : null;
-  const otrasPersonas = D.todos.filter((p) => ![F.a, F.b].includes(p.id));
-  const listo = F.a && F.b && F.blobs && !F.ocupado;
+  const quienes = [F.a, ...F.con];
+  const ya = F.con.length ? grupoExistente(quienes) || F.yaServidor : null;
+  const suman = quienes.filter(compite);
+  const listo = F.a && F.con.length && F.blobs && !F.ocupado;
   return `${cabeceraSub(ya ? 'Otra foto' : 'Nuevo encuentro')}<main class="pag">
     <form class="form" data-submit="guardar-nuevo">
-      <div class="dos">
-        <label class="campo"><span>Soy</span><select data-ch="nuevo-a">${D.gente.map((p) => `<option value="${p.id}" ${p.id === F.a ? 'selected' : ''}>${esc(p.display_name)}</option>`).join('')}</select></label>
-        <label class="campo"><span>Me encontré con</span><select data-ch="nuevo-b">${opcionesGente(F.b, F.a)}</select></label>
-      </div>
-      ${F.b ? `<p class="mas-tog"><button type="button" class="enlace" data-act="nuevo-mas-tog">${F.masAbierto ? 'Ocultar' : '+ ¿Salió alguien más en la foto?'}</button></p>` : ''}
-      ${F.b && F.masAbierto ? `<div class="campo mas-lista">${otrasPersonas.map((p) => `<label class="chk"><input type="checkbox" data-ch="nuevo-mas" value="${p.id}" ${F.mas.includes(p.id) ? 'checked' : ''}> ${nombreH(p.id)}</label>`).join('')}</div>` : ''}
-      ${ya ? `<div class="aviso">${img(ya.thumb_path || ya.photo_path, '', 'mini')}<div><b>Ya tenéis esa foto${ya.status === 'pending' ? ' (pendiente de revisión)' : ''}.</b>
-        <small>Puedes añadir otra al mismo grupo. No cambia el progreso.</small>
-        ${ya.status !== 'pending' ? `<a href="/encuentro/${ya.id}" data-link>Ver el encuentro</a>` : ''}</div></div>` : ''}
+      <label class="campo"><span>Soy</span><select data-ch="nuevo-a">${opcionesGente(F.a)}</select></label>
       <div class="campo"><span>Foto</span>${fotoPicker(F)}</div>
+      <div class="campo"><span>¿Con quién? <em>toca una o varias personas · ✓ = ya tenéis foto</em></span>${chipsCon(F)}</div>
+      ${F.con.length ? `<p class="resumen">${quienes.length > 2 ? `Foto de ${quienes.length}: ` : ''}${quienes.map(nombreH).join(', ')}.${suman.length >= 2 ? ` <b>Cuenta para ${suman.length === 2 ? 'los dos' : `los ${suman.length}`}</b>, la suba quien la suba.` : ' Con profes no suma al reto.'}</p>` : ''}
+      ${ya ? `<div class="aviso">${img(ya.thumb_path || ya.photo_path, '', 'mini')}<div><b>Ya tenéis una foto con exactamente este grupo${ya.status === 'pending' ? ' (pendiente de revisión)' : ''}.</b>
+        <small>Esta se añadirá a ese mismo encuentro como foto extra. No cambia el progreso.</small>
+        ${ya.status !== 'pending' ? `<a href="/encuentro/${ya.id}" data-link>Ver el encuentro</a>` : ''}</div></div>` : ''}
       ${ya ? '' : `<label class="campo"><span>Lugar <em>opcional</em></span><input type="text" data-in="nuevo-lugar" value="${esc(F.place)}" maxlength="120" placeholder="¿Dónde fue?" autocomplete="off" enterkeyhint="done"></label>
       ${F.editarFecha
         ? `<label class="campo"><span>Fecha y hora</span><input type="datetime-local" data-in="nuevo-cuando" value="${esc(F.cuando || toLocalInput())}" max="${toLocalInput(new Date(Date.now() + 864e5))}"></label>`
         : `<p class="cuando">Fecha y hora: <b>ahora</b> <button type="button" class="enlace" data-act="nuevo-fecha">Cambiar</button></p>`}`}
       ${F.error ? `<p class="error">${esc(F.error)}</p>` : ''}
-      <div class="pie-form"><button class="cta" ${listo ? '' : 'disabled'}>${F.ocupado ? '<span class="spin"></span> Guardando…' : ya ? 'AÑADIR FOTO' : 'GUARDAR ENCUENTRO'}</button></div>
+      <div class="pie-form"><button class="cta" ${listo ? '' : 'disabled'}>${F.ocupado ? '<span class="spin"></span> Guardando…' : !F.con.length ? 'ELIGE CON QUIÉN' : !F.blobs ? 'FALTA LA FOTO' : ya ? 'AÑADIR FOTO' : 'GUARDAR ENCUENTRO'}</button></div>
     </form>
   </main>`;
 }
-acts['nuevo-a'] = (el) => { FN.a = el.value; if (FN.b === FN.a) FN.b = ''; FN.mas = FN.mas.filter((id) => id !== FN.a); FN.yaServidor = null; render(); };
-acts['nuevo-b'] = (el) => { FN.b = el.value; FN.mas = FN.mas.filter((id) => id !== FN.b); FN.yaServidor = null; render(); };
-acts['nuevo-mas-tog'] = () => { FN.masAbierto = !FN.masAbierto; render(); };
-acts['nuevo-mas'] = (el) => { FN.mas = el.checked ? [...FN.mas, el.value] : FN.mas.filter((id) => id !== el.value); FN.yaServidor = null; render(); };
+acts['nuevo-a'] = (el) => { FN.a = el.value; FN.con = FN.con.filter((id) => id !== FN.a); FN.yaServidor = null; render(); };
+acts['nuevo-con'] = (el) => { const id = el.dataset.id; FN.con = FN.con.includes(id) ? FN.con.filter((x) => x !== id) : [...FN.con, id]; FN.yaServidor = null; render(); };
 acts['nuevo-lugar'] = (el) => { FN.place = el.value; };
 acts['nuevo-cuando'] = (el) => { FN.cuando = el.value; };
 acts['nuevo-fecha'] = () => { FN.editarFecha = true; FN.cuando = toLocalInput(); render(); };
 
 acts['guardar-nuevo'] = async () => {
-  const F = FN; if (!F || F.ocupado || !F.a || !F.b || !F.blobs) return;
-  const quienes = [...new Set([F.a, F.b, ...F.mas])];
+  const F = FN; if (!F || F.ocupado || !F.a || !F.con.length || !F.blobs) return;
+  const quienes = [...new Set([F.a, ...F.con])];
   F.ocupado = true; F.error = ''; render();
   try {
     const rutas = await subirSiHaceFalta(F, 'enc');
@@ -255,7 +271,8 @@ acts['guardar-nuevo'] = async () => {
     }
     if (r.encounter.status === 'pending') { toast('Enviado. Aparecerá cuando lo revise el admin.', 4000); FN = null; return nav.ir('/', { replace: true }); }
     aplicarLocal((d) => { d.encounters.push(r.encounter); });
-    toast(quienes.length > 2 ? '¡Hecho! Suma para todo el grupo' : `¡Hecho! Suma para ${nombre(F.a)} y para ${nombre(F.b)}`, 3200);
+    const suman = quienes.filter(compite);
+    toast(suman.length < 2 ? '¡Foto guardada!' : suman.length > 2 ? '¡Hecho! Suma para todo el grupo' : `¡Hecho! Suma para ${nombre(suman[0])} y para ${nombre(suman[1])}`, 3200);
     FN = null; nav.ir(`/encuentro/${r.encounter.id}`, { replace: true });
   } catch (e) { F.error = textoError(e); F.ocupado = false; render(); }
 };

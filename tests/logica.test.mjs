@@ -14,7 +14,8 @@ console.log('1) Acceso');
 ok((await ir('access_info')).body.data.code_required === true, 'pide código');
 ok((await ir('get_state', {}, { code: 'MAL' })).status === 401, 'código incorrecto → 401');
 const st1 = await ir('get_state', {}, { code: 'fit2026' });
-ok(st1.status === 200 && st1.body.data.participants.length === 33, 'código correcto: 29 + nº30 + 3 profes = 33 participantes');
+ok(st1.status === 200 && st1.body.data.participants.length === 33, 'código correcto: 30 alumnos + 3 profes = 33 participantes, sin nº30');
+ok(st1.body.data.participants.some((p) => p.display_name === 'Julia de la T.' && p.compites), 'está Julia de la T. y compite');
 const profes = st1.body.data.participants.filter((p) => !p.compites);
 ok(profes.length === 3 && profes.every((p) => ['Cou', 'Feña', 'Gala'].includes(p.display_name)), 'Cou, Feña y Gala no compiten');
 const [ana, bea, cel] = st1.body.data.participants.filter((p) => p.compites);
@@ -57,10 +58,10 @@ const tok = lg.body.data.token;
 ok((await ir('is_admin', {}, { token: tok })).body.data === true, 'token válido → is_admin');
 ok((await ir('is_admin', {}, { token: '999.abc' })).body.data === false, 'token inventado → no admin');
 
-console.log('7) Admin: renombrar nº30, editar grupo de una foto, borrar');
-const n30 = st1.body.data.participants.find((p) => p.is_placeholder);
-const ren = await ir('admin_update', { tabla: 'participants', id: n30.id, cambios: { display_name: 'NombreReal', is_placeholder: false } }, { token: tok });
-ok(ren.status === 200 && ren.body.data.display_name === 'NombreReal', 'renombra al nº30');
+console.log('7) Admin: renombrar a alguien, editar grupo de una foto, borrar');
+ok(!st1.body.data.participants.some((p) => p.is_placeholder), 'ya no hay participante provisional nº30');
+const ren = await ir('admin_update', { tabla: 'participants', id: cel.id, cambios: { display_name: 'NombreNuevo' } }, { token: tok });
+ok(ren.status === 200 && ren.body.data.display_name === 'NombreNuevo', 'admin renombra a un participante');
 const ed = await ir('admin_update', { tabla: 'encounters', id: r1.body.data.encounter.id, cambios: { place: 'Praza Nova', participants: [ana.id, bea.id] } }, { token: tok });
 ok(ed.status === 200 && ed.body.data.participants.length === 2, 'admin puede quitar a una persona de una foto de grupo');
 const bo = await ir('admin_remove', { tabla: 'encounters', id: r1.body.data.encounter.id }, { token: tok });
@@ -74,6 +75,18 @@ ok((await ir('upload', { tipo: 'enc', photo: 'no-es-jpeg', thumb: JPEG }, { code
 ok((await ir('admin_set_code', { code: '' })).status === 403, 'cambiar código sin admin: rechazado');
 await ir('admin_set_code', { code: '' }, { token: tok });
 ok((await ir('access_info')).body.data.code_required === false, 'admin quita el código: entrada libre');
+
+console.log('9) Código por defecto Fitiñas26 y admin distinto del código');
+{
+  const db2 = crearDbMemoria(), at2 = crearLogica({ db: db2, blobs: crearBlobsMemoria(), env: { ADMIN_PASSWORD: 'otra-clave-larga' } });
+  const ir2 = (fn, args, ctx = {}) => at2({ fn, args, code: ctx.code, token: ctx.token });
+  ok((await ir2('get_state', {}, { code: 'Fitiñas26' })).status === 200, 'sin CODIGO_RETO en Vercel, el código es Fitiñas26');
+  ok((await ir2('get_state', {}, { code: 'fitiñas26' })).status === 200, 'también en minúsculas');
+  ok((await ir2('get_state', {}, { code: 'Fitinas26' })).status === 401, 'sin la ñ no vale');
+  const db3 = crearDbMemoria(), at3 = crearLogica({ db: db3, blobs: crearBlobsMemoria(), env: { ADMIN_PASSWORD: 'Fitiñas26' } });
+  const r = await at3({ fn: 'login', args: { password: 'Fitiñas26' } });
+  ok(r.status === 503 && r.body.code === 'ADMIN_IGUAL_CODIGO', 'si ADMIN_PASSWORD = código del reto, el panel NO deja entrar (si no, todo el grupo sería admin)');
+}
 
 console.log(fallos ? `\n${fallos} FALLOS` : '\nTODO OK');
 process.exit(fallos ? 1 : 0);

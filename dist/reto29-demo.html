@@ -220,6 +220,18 @@ input::placeholder { color: #6d8aa0; }
 .chk.inactivo { opacity: .55; }
 .chk-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; min-height: 40px; }
 .chk-inline input { width: 18px; height: 18px; accent-color: var(--amarillo); }
+.h2 .nota-in { font-style: normal; font-weight: 500; font-size: 14px; opacity: .85; margin-left: 4px; }
+
+/* ---------- "¿Con quién?": selección múltiple ---------- */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip { position: relative; min-height: 46px; border-radius: 12px; border: 2px solid var(--azul-raya); background: var(--azul-hondo); font-weight: 600; font-size: 15px; line-height: 1.1; padding: 4px 6px; }
+.chip.hecho::after { content: "✓"; position: absolute; top: 2px; right: 6px; font-size: 13px; color: var(--amarillo); }
+.chip.on { background: var(--amarillo); color: var(--tinta); border-color: var(--amarillo); }
+.chip.on.hecho::after { color: var(--tinta); }
+.chips-t { font-size: 14.5px; font-weight: 600; margin: 8px 0 4px; opacity: .9; }
+.resumen { background: var(--azul-hondo); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; margin-top: -4px; }
+.resumen b { color: var(--amarillo); }
+.version { text-align: center; font-size: 12.5px; opacity: .6; margin-top: 18px; }
 </style></head>
 <body><div id="app"><div class="boot">f!t</div></div><div id="toast" role="status" aria-live="polite"></div>
 <script>window.RETO29_CONFIG = { MODO: "demo", ROUTER: "memory" };</script>
@@ -268,6 +280,8 @@ const kv = {
   set(k, v, tipo = 'local') { try { if (!cajas[tipo]) { v == null ? mem.delete(k) : mem.set(k, v); return true; } v == null ? cajas[tipo].removeItem(k) : cajas[tipo].setItem(k, v); return true; } catch { return false; } },
 };
 
+const VERSION_WEB = '8';
+
 let toastT;
 function toast(msg, ms = 2600) {
   const el = document.getElementById('toast');
@@ -285,7 +299,9 @@ const ERRORES = {
   NOMBRE_VACIO: 'Escribe un nombre.',
   NO_ADMIN: 'Esta cuenta no tiene permisos de administración.',
   RED: 'Sin conexión. Comprueba los datos o el wifi y vuelve a intentarlo.',
-  LOGIN: 'Email o contraseña incorrectos.',
+  LOGIN: 'Contraseña incorrecta.',
+  ADMIN_NO_CONFIGURADO: 'Falta la variable ADMIN_PASSWORD en Vercel (mínimo 8 caracteres).',
+  ADMIN_IGUAL_CODIGO: 'La contraseña de administración no puede ser igual al código del reto: cámbiala en Vercel (ADMIN_PASSWORD).',
   DUPLICADO: 'Ya existe un registro igual (pareja o nombre repetido).',
   EN_USO: 'No se puede borrar porque tiene encuentros asociados. Desactívalo o borra antes sus encuentros.',
 };
@@ -299,7 +315,7 @@ function err(code, message) { const e = new Error(message || code); e.code = cod
 // La foto viaja al servidor como base64 dentro de un JSON (más simple y fiable en móvil que subidas
 // multipart en dos pasos). Por eso el límite de salida es más estricto que si fuera binario directo:
 // base64 pesa ~1.33×, y hay que dejar margen bajo el límite de payload de la función serverless.
-const LADO_FOTO = 1600, LADO_MINI = 400, MAX_ENTRADA = 60 * 1024 * 1024, MAX_SALIDA = 1.5 * 1024 * 1024;
+const LADO_FOTO = 1440, LADO_MINI = 360, MAX_ENTRADA = 60 * 1024 * 1024, MAX_SALIDA = 1.5 * 1024 * 1024;
 
 function cargar(file) {
   return new Promise((ok, ko) => {
@@ -335,10 +351,10 @@ async function prepararFoto(file) {
   const { img, url } = await cargar(file);
   try {
     if (!img.naturalWidth) throw err('FORMATO', 'No se pudo leer la imagen.');
-    let photo = await escalar(img, LADO_FOTO, 0.82);
+    let photo = await escalar(img, LADO_FOTO, 0.8);
     if (photo.size > MAX_SALIDA) photo = await escalar(img, 1280, 0.68);
     if (photo.size > MAX_SALIDA) photo = await escalar(img, 1000, 0.6);      // foto muy detallada (mucho ruido): último intento
-    const thumb = await escalar(img, LADO_MINI, 0.72);
+    const thumb = await escalar(img, LADO_MINI, 0.7);
     return { photo, thumb, preview: URL.createObjectURL(thumb) };
   } finally { URL.revokeObjectURL(url); }
 }
@@ -393,8 +409,8 @@ function crearBackend({ API_BASE } = {}) {
 // MODO DEMO: misma interfaz que el backend real, pero todo vive en este navegador.
 // Sirve para probar la web sin desplegar nada. Código: "demo". Admin: cualquier email + "demo".
 
-const K = 'reto29_demo_v2';
-const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
+const K = 'reto29_demo_v4';
+const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Julia de la T.','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
 const PROFES = [['Cou', 'profesor'], ['Feña', 'profesor'], ['Gala', 'profesora']];   // no compiten: no cuentan para el 29 ni el ranking
 
 function nuevo() {
@@ -403,7 +419,6 @@ function nuevo() {
     settings: { title: 'RETO 29 · FIT 2026', moderation_enabled: false, code: 'demo' },
     participants: [
       ...NOMBRES.map((n) => ({ id: uuid(), display_name: n, sort_name: null, active: true, is_placeholder: false, compites: true, created_at: now })),
-      { id: uuid(), display_name: '¿Nº 30?', sort_name: 'zzz', active: true, is_placeholder: true, compites: true, created_at: now },
       ...PROFES.map(([n, c]) => ({ id: uuid(), display_name: n, sort_name: 'zzzz' + n, category: c, active: true, is_placeholder: false, compites: false, created_at: now })),
     ],
     encounters: [], encounter_photos: [], fotos: {},
@@ -435,7 +450,7 @@ function crearDemo() {
     async getState(code) {
       await espera(); acceso(code);
       const { fotos, settings, ...resto } = db;
-      return JSON.parse(JSON.stringify({ ...resto, settings: { title: settings.title, moderation_enabled: settings.moderation_enabled, code_required: !!settings.code } }));
+      return JSON.parse(JSON.stringify({ ...resto, settings: { title: settings.title, moderation_enabled: settings.moderation_enabled, code_required: !!settings.code, version: 'demo' } }));
     },
     async uploadPhoto(tipo, { photo, thumb }) {
       const id = uuid(); const photo_path = `${tipo}/${id}.jpg`, thumb_path = `${tipo}/${id}_t.jpg`;
@@ -751,8 +766,7 @@ function avisos() {
   const pend = d.encounters.filter((e) => e.status === 'pending').length;
   if (pend) out.push(`${pend} encuentro(s) pendientes de revisión.`);
   const act = d.participants.filter((p) => p.active && p.compites);
-  if (act.length !== 30) out.push(`Hay ${act.length} participantes activos que compiten (deberían ser 30).`);
-  if (act.some((p) => p.is_placeholder)) out.push('Falta poner nombre al participante nº30 (pestaña Participantes).');
+  if (act.some((p) => p.is_placeholder)) out.push('Hay un participante provisional sin nombre (pestaña Participantes).');
   const vistos = new Map();
   for (const p of d.participants) { const k = norm(p.display_name); if (vistos.has(k)) out.push(`Nombres casi iguales: «${vistos.get(k)}» y «${p.display_name}».`); else vistos.set(k, p.display_name); }
   return out.length ? `<ul class="avisos">${out.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
@@ -827,8 +841,8 @@ function tabGente() {
   const gente = ordenar(S.data.participants), act = gente.filter((p) => p.active && p.compites).length;
   return `<p class="nota">${act} activos que compiten, de ${gente.filter((p) => p.compites).length}. Cada uno tiene ${Math.max(0, act - 1)} encuentros posibles. Los profes (en cursiva) no compiten.</p>
     ${gente.map((p) => `<form class="adm-item ${p.is_placeholder ? 'prov' : ''} ${p.active ? '' : 'inactivo'}" data-submit="adm-p-guardar" data-id="${p.id}">
-      ${p.is_placeholder ? '<p class="error">Provisional: escribe aquí el nombre real del nº30 y guarda.</p>' : ''}
-      <input type="text" name="nombre" value="${esc(p.is_placeholder ? '' : p.display_name)}" placeholder="${p.is_placeholder ? 'Nombre del participante nº30' : ''}" maxlength="40" required autocomplete="off" class="${p.compites ? '' : 'cursiva'}">
+      ${p.is_placeholder ? '<p class="error">Provisional: escribe el nombre real y guarda, o bórralo.</p>' : ''}
+      <input type="text" name="nombre" value="${esc(p.is_placeholder ? '' : p.display_name)}" placeholder="${p.is_placeholder ? 'Nombre real' : ''}" maxlength="40" required autocomplete="off" class="${p.compites ? '' : 'cursiva'}">
       <div class="adm-bot">
       <label class="chk-inline"><input type="checkbox" data-act="adm-p-compite" data-id="${p.id}" ${p.compites ? 'checked' : ''}> Compite</label>
       <button class="btn btn-mini">Guardar</button>
@@ -857,7 +871,7 @@ function tabAjustes() {
       <p class="nota">${s.moderation_enabled ? 'Activada: los encuentros nuevos quedan ocultos hasta que los apruebes.' : 'Desactivada: los encuentros se publican al instante (recomendado).'}</p>
       <button class="btn" data-act="adm-moderacion">${s.moderation_enabled ? 'Desactivar moderación previa' : 'Activar moderación previa'}</button></div>
     ${backend.modo === 'demo' ? `<div class="form"><h2 class="h2">Demo</h2><button class="btn" data-act="demo-sembrar">Rellenar con encuentros de ejemplo</button><button class="btn peligro" data-act="demo-vaciar">Vaciar la demo</button></div>` : ''}
-    <p class="nota">modo ${backend.modo}</p>`;
+    <p class="nota">modo ${backend.modo} · servidor v${esc(S.data.settings.version || '?')}</p>`;
 }
 acts['adm-codigo'] = (f) => { const c = f.codigo.value.trim(); hacer(async () => { await backend.setCode(c); A.enlace = c ? `${location.origin}/?c=${encodeURIComponent(c)}` : ''; }, c ? 'Código cambiado' : 'Código quitado'); };
 acts['adm-copiar'] = async () => { try { await navigator.clipboard.writeText(A.enlace); toast('Copiado'); } catch { toast('Mantén pulsado el enlace para copiarlo'); } };
@@ -905,7 +919,7 @@ function vistaEntrada() {
   return `<main class="entrada">
     <p class="logo-xl">f!t</p>
     <h1 class="titulo-xl">RETO 29</h1>
-    <p class="sub">Una foto con cada una de las otras 29 personas del FIT 2026.</p>
+    <p class="sub">Una foto con cada persona del grupo del FIT 2026.</p>
     ${E.info === null && !E.error ? `<p class="cargando"><span class="spin"></span> Conectando…</p>` : `
     <form data-submit="entrar" class="form">
       <label class="campo"><span>Código del reto</span>
@@ -940,12 +954,16 @@ acts.entrar = async (form) => {
   E.ocupado = false; render();
 };
 
+const botonNombre = (p) => `<button class="nombre ${p.id === S.yo ? 'sel' : ''} ${p.is_placeholder ? 'prov' : ''} ${p.compites ? '' : 'cursiva'}" data-act="soy" data-id="${p.id}">${esc(p.display_name)}${p.is_placeholder ? '<small>provisional</small>' : ''}</button>`;
 function vistaQuien(primera) {
+  const profes = D.todos.filter((p) => !p.compites);
   return `${primera ? `<header class="top"><span class="marca"><b>f!t</b><span>Reto 29</span></span></header>` : cabeceraSub('¿Quién eres?')}
   <main class="pag">
     ${primera ? `<h1 class="h1">¿Quién eres?</h1><p class="sub">Se guarda en este teléfono para no preguntártelo más. Puedes cambiarlo cuando quieras.</p>` : ''}
-    <div class="grid-nombres">${D.gente.map((p) => `<button class="nombre ${p.id === S.yo ? 'sel' : ''} ${p.is_placeholder ? 'prov' : ''}" data-act="soy" data-id="${p.id}">${esc(p.display_name)}${p.is_placeholder ? '<small>provisional</small>' : ''}</button>`).join('')}</div>
+    <div class="grid-nombres">${D.gente.map(botonNombre).join('')}</div>
+    ${profes.length ? `<h2 class="h2">Profes <em class="nota-in">no compiten, pero pueden subir fotos</em></h2><div class="grid-nombres">${profes.map(botonNombre).join('')}</div>` : ''}
     ${!primera ? `<p class="centro"><a class="enlace" href="/admin" data-link>Administración</a></p>` : ''}
+    <p class="version">web v${VERSION_WEB} · servidor v${esc(S.data?.settings?.version || '?')}</p>
   </main>`;
 }
 acts.soy = (el) => { elegirYo(el.dataset.id); if (nav.ruta.path === '/quien') nav.ir('/', { replace: true }); };
@@ -954,7 +972,7 @@ acts.soy = (el) => { elegirYo(el.dataset.id); if (nav.ruta.path === '/quien') na
 function cabecera() {
   return `<header class="top">
     <a class="marca" href="/" data-link aria-label="Inicio"><b>f!t</b><span>Reto 29</span></a>
-    <a class="chip-yo" href="/quien" data-link aria-label="Cambiar quién soy">${ico.yo}<span>${esc(nombre(S.yo))}</span></a>
+    <a class="chip-yo" href="/quien" data-link aria-label="Cambiar quién soy">${ico.yo}<span>${nombreH(S.yo)}</span></a>
   </header>`;
 }
 function cabeceraSub(titulo, vuelta = '/') {
@@ -981,12 +999,12 @@ function vistaInicio() {
   const falta = t - n;
   return `${cabecera()}<main class="pag">
     ${backend.modo === 'demo' ? `<p class="demo-b">Modo demo: nada sale de este dispositivo. <button class="enlace" data-act="demo-sembrar">Rellenar con ejemplos</button></p>` : ''}
-    <section class="prog" aria-label="Mi progreso">
+    ${!compite(S.yo) ? `<section class="prog"><p class="prog-t">Profe · no compites</p><p class="prog-n"><b>${misEncuentros(S.yo).length}</b><i>${misEncuentros(S.yo).length === 1 ? 'foto' : 'fotos'}</i></p><p class="prog-s">Sales en el álbum, pero no cuentas para el reto de nadie.</p></section>` : `<section class="prog" aria-label="Mi progreso">
       <p class="prog-t">Mi progreso</p>
       <p class="prog-n"><b>${n}</b><i>/ ${t}</i></p>
       <div class="barra" role="progressbar" aria-valuemin="0" aria-valuemax="${t}" aria-valuenow="${n}"><span style="width:${pct}%"></span></div>
       <p class="prog-s">${n === 0 ? 'Empieza por quien tengas al lado.' : falta === 0 ? '¡Reto completado! Tienes foto con todo el grupo.' : `Te ${falta === 1 ? 'falta 1 persona' : `faltan ${falta} personas`}.`}</p>
-    </section>
+    </section>`}
     <a class="cta" href="/nuevo" data-link>${ico.camara} AÑADIR ENCUENTRO</a>
     <h2 class="h2">Mis últimos encuentros</h2>
     ${mios.length ? mios.slice(0, 3).map(filaEncuentro).join('') : `<p class="vacio">Aún no tienes ninguno. La primera foto es la más fácil.</p>`}
@@ -995,6 +1013,12 @@ function vistaInicio() {
 
 // ------------------------------------------------------------------ Mi reto
 function vistaMiReto() {
+  if (!compite(S.yo) && !nav.ruta.q.get('p')) {
+    const mias = misEncuentros(S.yo);
+    return `${cabecera()}<main class="pag"><div class="reto-cab"><h1 class="h1">Mis fotos</h1><p class="reto-n"><b>${mias.length}</b></p></div>
+      ${mias.length ? `<div class="grid-reto">${mias.map((e) => `<a class="tile hecho" href="/encuentro/${e.id}" data-link>${img(e.thumb_path || e.photo_path, '')}<span class="tile-n">${ordenNombres(e).filter((id) => id !== S.yo).map((id) => esc(nombre(id))).join(', ')}</span></a>`).join('')}</div>` : '<p class="vacio">Aún no sales en ninguna foto.</p>'}
+    </main>${barraNav()}`;
+  }
   const de = D.porId.get(nav.ruta.q.get('p'))?.compites && D.porId.get(nav.ruta.q.get('p'))?.active ? nav.ruta.q.get('p') : S.yo;
   const n = D.cuenta.get(de) || 0;
   const otros = D.gente.filter((p) => p.id !== de);
@@ -1059,54 +1083,60 @@ function vistaRanking() {
 let FN = null;
 function estadoNuevo() {
   if (!FN) {
-    const q = nav.ruta.q, okC = (id) => (D.gente.some((p) => p.id === id) ? id : null), okT = (id) => (D.todos.some((p) => p.id === id) ? id : null);
-    FN = { a: okC(q.get('a')) || S.yo, b: okT(q.get('b')) || '', mas: [], masAbierto: false, place: '', cuando: null, editarFecha: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, error: '', errFoto: '' };
-    if (FN.a === FN.b) FN.b = '';
+    const q = nav.ruta.q, ok = (id) => (D.todos.some((p) => p.id === id) ? id : null);
+    FN = { a: ok(q.get('a')) || S.yo, con: [], place: '', cuando: null, editarFecha: false, preview: null, blobs: null, rutas: null, procesando: false, ocupado: false, error: '', errFoto: '' };
+    const b = ok(q.get('b')); if (b && b !== FN.a) FN.con = [b];
   }
   return FN;
 }
 const grupoExistente = (ids) => { const set = new Set(ids); return S.data?.encounters.find((e) => e.participants.length === set.size && e.participants.every((id) => set.has(id))) || null; };
-function opcionesGente(sel, excluir) {
-  return D.todos.filter((p) => p.id !== excluir).map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''} ${p.compites ? '' : 'class="cursiva"'}>${esc(p.display_name)}</option>`).join('');
+function opcionesGente(sel) {
+  return D.todos.map((p) => `<option value="${p.id}" ${p.id === sel ? 'selected' : ''}>${esc(p.display_name)}${p.compites ? '' : ' (profe)'}</option>`).join('');
+}
+// "¿Con quién?": rejilla de nombres, se pueden marcar varias personas (foto de grupo).
+// ✓ = ya tienes foto con esa persona (para encontrar rápido a quien te falta).
+function chipsCon(F) {
+  const chip = (p) => {
+    const on = F.con.includes(p.id), hecho = compite(F.a) && p.compites && encuentroDe(F.a, p.id);
+    return `<button type="button" class="chip ${on ? 'on' : ''} ${p.compites ? '' : 'cursiva'} ${hecho ? 'hecho' : ''}" data-act="nuevo-con" data-id="${p.id}" data-nombre="${esc(p.display_name)}" aria-pressed="${on}">${esc(p.display_name)}</button>`;
+  };
+  const otros = D.todos.filter((p) => p.id !== F.a);
+  return `<div class="chips">${otros.filter((p) => p.compites).map(chip).join('')}</div>
+    ${otros.some((p) => !p.compites) ? `<p class="chips-t">Profes</p><div class="chips">${otros.filter((p) => !p.compites).map(chip).join('')}</div>` : ''}`;
 }
 function vistaNuevo() {
   const F = estadoNuevo();
-  const quienes = [F.a, F.b, ...F.mas].filter(Boolean);
-  const ya = F.a && F.b ? grupoExistente(quienes) || F.yaServidor : null;
-  const otrasPersonas = D.todos.filter((p) => ![F.a, F.b].includes(p.id));
-  const listo = F.a && F.b && F.blobs && !F.ocupado;
+  const quienes = [F.a, ...F.con];
+  const ya = F.con.length ? grupoExistente(quienes) || F.yaServidor : null;
+  const suman = quienes.filter(compite);
+  const listo = F.a && F.con.length && F.blobs && !F.ocupado;
   return `${cabeceraSub(ya ? 'Otra foto' : 'Nuevo encuentro')}<main class="pag">
     <form class="form" data-submit="guardar-nuevo">
-      <div class="dos">
-        <label class="campo"><span>Soy</span><select data-ch="nuevo-a">${D.gente.map((p) => `<option value="${p.id}" ${p.id === F.a ? 'selected' : ''}>${esc(p.display_name)}</option>`).join('')}</select></label>
-        <label class="campo"><span>Me encontré con</span><select data-ch="nuevo-b">${opcionesGente(F.b, F.a)}</select></label>
-      </div>
-      ${F.b ? `<p class="mas-tog"><button type="button" class="enlace" data-act="nuevo-mas-tog">${F.masAbierto ? 'Ocultar' : '+ ¿Salió alguien más en la foto?'}</button></p>` : ''}
-      ${F.b && F.masAbierto ? `<div class="campo mas-lista">${otrasPersonas.map((p) => `<label class="chk"><input type="checkbox" data-ch="nuevo-mas" value="${p.id}" ${F.mas.includes(p.id) ? 'checked' : ''}> ${nombreH(p.id)}</label>`).join('')}</div>` : ''}
-      ${ya ? `<div class="aviso">${img(ya.thumb_path || ya.photo_path, '', 'mini')}<div><b>Ya tenéis esa foto${ya.status === 'pending' ? ' (pendiente de revisión)' : ''}.</b>
-        <small>Puedes añadir otra al mismo grupo. No cambia el progreso.</small>
-        ${ya.status !== 'pending' ? `<a href="/encuentro/${ya.id}" data-link>Ver el encuentro</a>` : ''}</div></div>` : ''}
+      <label class="campo"><span>Soy</span><select data-ch="nuevo-a">${opcionesGente(F.a)}</select></label>
       <div class="campo"><span>Foto</span>${fotoPicker(F)}</div>
+      <div class="campo"><span>¿Con quién? <em>toca una o varias personas · ✓ = ya tenéis foto</em></span>${chipsCon(F)}</div>
+      ${F.con.length ? `<p class="resumen">${quienes.length > 2 ? `Foto de ${quienes.length}: ` : ''}${quienes.map(nombreH).join(', ')}.${suman.length >= 2 ? ` <b>Cuenta para ${suman.length === 2 ? 'los dos' : `los ${suman.length}`}</b>, la suba quien la suba.` : ' Con profes no suma al reto.'}</p>` : ''}
+      ${ya ? `<div class="aviso">${img(ya.thumb_path || ya.photo_path, '', 'mini')}<div><b>Ya tenéis una foto con exactamente este grupo${ya.status === 'pending' ? ' (pendiente de revisión)' : ''}.</b>
+        <small>Esta se añadirá a ese mismo encuentro como foto extra. No cambia el progreso.</small>
+        ${ya.status !== 'pending' ? `<a href="/encuentro/${ya.id}" data-link>Ver el encuentro</a>` : ''}</div></div>` : ''}
       ${ya ? '' : `<label class="campo"><span>Lugar <em>opcional</em></span><input type="text" data-in="nuevo-lugar" value="${esc(F.place)}" maxlength="120" placeholder="¿Dónde fue?" autocomplete="off" enterkeyhint="done"></label>
       ${F.editarFecha
         ? `<label class="campo"><span>Fecha y hora</span><input type="datetime-local" data-in="nuevo-cuando" value="${esc(F.cuando || toLocalInput())}" max="${toLocalInput(new Date(Date.now() + 864e5))}"></label>`
         : `<p class="cuando">Fecha y hora: <b>ahora</b> <button type="button" class="enlace" data-act="nuevo-fecha">Cambiar</button></p>`}`}
       ${F.error ? `<p class="error">${esc(F.error)}</p>` : ''}
-      <div class="pie-form"><button class="cta" ${listo ? '' : 'disabled'}>${F.ocupado ? '<span class="spin"></span> Guardando…' : ya ? 'AÑADIR FOTO' : 'GUARDAR ENCUENTRO'}</button></div>
+      <div class="pie-form"><button class="cta" ${listo ? '' : 'disabled'}>${F.ocupado ? '<span class="spin"></span> Guardando…' : !F.con.length ? 'ELIGE CON QUIÉN' : !F.blobs ? 'FALTA LA FOTO' : ya ? 'AÑADIR FOTO' : 'GUARDAR ENCUENTRO'}</button></div>
     </form>
   </main>`;
 }
-acts['nuevo-a'] = (el) => { FN.a = el.value; if (FN.b === FN.a) FN.b = ''; FN.mas = FN.mas.filter((id) => id !== FN.a); FN.yaServidor = null; render(); };
-acts['nuevo-b'] = (el) => { FN.b = el.value; FN.mas = FN.mas.filter((id) => id !== FN.b); FN.yaServidor = null; render(); };
-acts['nuevo-mas-tog'] = () => { FN.masAbierto = !FN.masAbierto; render(); };
-acts['nuevo-mas'] = (el) => { FN.mas = el.checked ? [...FN.mas, el.value] : FN.mas.filter((id) => id !== el.value); FN.yaServidor = null; render(); };
+acts['nuevo-a'] = (el) => { FN.a = el.value; FN.con = FN.con.filter((id) => id !== FN.a); FN.yaServidor = null; render(); };
+acts['nuevo-con'] = (el) => { const id = el.dataset.id; FN.con = FN.con.includes(id) ? FN.con.filter((x) => x !== id) : [...FN.con, id]; FN.yaServidor = null; render(); };
 acts['nuevo-lugar'] = (el) => { FN.place = el.value; };
 acts['nuevo-cuando'] = (el) => { FN.cuando = el.value; };
 acts['nuevo-fecha'] = () => { FN.editarFecha = true; FN.cuando = toLocalInput(); render(); };
 
 acts['guardar-nuevo'] = async () => {
-  const F = FN; if (!F || F.ocupado || !F.a || !F.b || !F.blobs) return;
-  const quienes = [...new Set([F.a, F.b, ...F.mas])];
+  const F = FN; if (!F || F.ocupado || !F.a || !F.con.length || !F.blobs) return;
+  const quienes = [...new Set([F.a, ...F.con])];
   F.ocupado = true; F.error = ''; render();
   try {
     const rutas = await subirSiHaceFalta(F, 'enc');
@@ -1124,7 +1154,8 @@ acts['guardar-nuevo'] = async () => {
     }
     if (r.encounter.status === 'pending') { toast('Enviado. Aparecerá cuando lo revise el admin.', 4000); FN = null; return nav.ir('/', { replace: true }); }
     aplicarLocal((d) => { d.encounters.push(r.encounter); });
-    toast(quienes.length > 2 ? '¡Hecho! Suma para todo el grupo' : `¡Hecho! Suma para ${nombre(F.a)} y para ${nombre(F.b)}`, 3200);
+    const suman = quienes.filter(compite);
+    toast(suman.length < 2 ? '¡Foto guardada!' : suman.length > 2 ? '¡Hecho! Suma para todo el grupo' : `¡Hecho! Suma para ${nombre(suman[0])} y para ${nombre(suman[1])}`, 3200);
     FN = null; nav.ir(`/encuentro/${r.encounter.id}`, { replace: true });
   } catch (e) { F.error = textoError(e); F.ocupado = false; render(); }
 };

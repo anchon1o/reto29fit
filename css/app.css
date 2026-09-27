@@ -215,3 +215,15 @@ input::placeholder { color: #6d8aa0; }
 .chk.inactivo { opacity: .55; }
 .chk-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; min-height: 40px; }
 .chk-inline input { width: 18px; height: 18px; accent-color: var(--amarillo); }
+.h2 .nota-in { font-style: normal; font-weight: 500; font-size: 14px; opacity: .85; margin-left: 4px; }
+
+/* ---------- "¿Con quién?": selección múltiple ---------- */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip { position: relative; min-height: 46px; border-radius: 12px; border: 2px solid var(--azul-raya); background: var(--azul-hondo); font-weight: 600; font-size: 15px; line-height: 1.1; padding: 4px 6px; }
+.chip.hecho::after { content: "✓"; position: absolute; top: 2px; right: 6px; font-size: 13px; color: var(--amarillo); }
+.chip.on { background: var(--amarillo); color: var(--tinta); border-color: var(--amarillo); }
+.chip.on.hecho::after { color: var(--tinta); }
+.chips-t { font-size: 14.5px; font-weight: 600; margin: 8px 0 4px; opacity: .9; }
+.resumen { background: var(--azul-hondo); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; margin-top: -4px; }
+.resumen b { color: var(--amarillo); }
+.version { text-align: center; font-size: 12.5px; opacity: .6; margin-top: 18px; }

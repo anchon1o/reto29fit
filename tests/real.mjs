@@ -1,0 +1,28 @@
+// Recorrido en MODO REAL contra tests/servidor-real-local.mjs (API de verdad, BD en memoria).
+import { chromium, devices } from 'playwright';
+const URL_ = 'http://localhost:5174';
+let fallos = 0; const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); if (!c) fallos++; };
+const b = await chromium.launch(); const ctx = await b.newContext({ ...devices['iPhone 13'] }); const page = await ctx.newPage();
+const errores = []; page.on('pageerror', (e) => errores.push(e.message));
+const txt = (s) => page.locator(s).first().innerText();
+await page.goto(URL_); await page.waitForSelector('input[name=codigo]');
+ok(!(await page.content()).includes('Modo demo'), 'no sale "modo demo"');
+await page.fill('input[name=codigo]', 'demo'); await page.click('button.cta'); await page.waitForSelector('.error');
+ok(true, 'el código "demo" ya no vale');
+await page.fill('input[name=codigo]', 'fitiñas26'); await page.click('button.cta'); await page.waitForSelector('.grid-nombres');
+ok(true, 'entra con fitiñas26 (en minúsculas también)');
+ok((await page.locator('.nombre', { hasText: /^Julia de la T\.$/ }).count()) === 1, 'aparece Julia de la T.');
+await page.locator('.nombre', { hasText: /^Julia de la T\.$/ }).click(); await page.waitForSelector('.prog');
+ok((await txt('.prog-n')).replace(/\s+/g, '') === '0/29', 'Julia empieza en 0/29');
+await page.click('a.cta'); await page.waitForSelector('.chips');
+await page.click('.chips .chip[data-nombre="Xana"]');
+const b64 = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 2000; c.height = 1500; const g = c.getContext('2d'); g.fillStyle = '#c84'; g.fillRect(0, 0, 2000, 1500); return c.toDataURL('image/jpeg', 0.9).split(',')[1]; });
+await page.locator('input[type=file]:not([capture])').first().setInputFiles({ name: 'f.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(b64, 'base64') });
+await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
+ok(await page.locator('.det-foto img').evaluate((i) => i.decode().then(() => i.naturalWidth > 0)), 'la foto subida por la API se ve en el detalle');
+await page.goto(URL_); await page.waitForSelector('.prog');
+ok((await txt('.prog-n')).replace(/\s+/g, '') === '1/29', 'Julia pasa a 1/29 tras recargar (dato guardado en el servidor)');
+await page.goto(URL_ + '/admin'); await page.fill('input[name=password]', 'clave-de-admin-local'); await page.click('button.cta'); await page.waitForSelector('.tabs');
+ok((await page.locator('.adm-fila').count()) === 1, 'el admin ve el encuentro');
+ok(!errores.length, 'sin errores JS' + (errores.length ? ': ' + errores.join(' | ') : ''));
+await b.close(); console.log(fallos ? `${fallos} FALLOS` : 'REAL OK'); process.exit(fallos ? 1 : 0);

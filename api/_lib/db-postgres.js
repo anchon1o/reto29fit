@@ -85,8 +85,9 @@ export function crearDbPostgres() {
       if (listo) return listo;
       return (listo = (async () => {
         for (const parte of SQL_ESQUEMA.split(';').map((x) => x.trim()).filter(Boolean)) await sql.query(parte);
-        await sql`insert into settings (id) values (true) on conflict (id) do nothing`;
-        if (hashInicial) await sql`update settings set challenge_code_hash = ${hashInicial} where id and challenge_code_hash is null`;
+        await sql`insert into settings (id, challenge_code_hash) values (true, ${hashInicial}) on conflict (id) do nothing`;
+        // Versiones anteriores sembraban un «¿Nº 30?» provisional: se quita si nadie llegó a usarlo.
+        await sql`delete from participants p where p.is_placeholder and not exists (select 1 from encounter_participants ep where ep.participant_id = p.id)`;
         for (const p of semilla.participantes) {
           await sql`insert into participants (display_name, sort_name, is_placeholder, compites)
                     values (${p.display_name}, ${p.sort_name}, ${p.is_placeholder}, ${p.compites})

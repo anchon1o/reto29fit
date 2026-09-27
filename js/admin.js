@@ -48,8 +48,7 @@ function avisos() {
   const pend = d.encounters.filter((e) => e.status === 'pending').length;
   if (pend) out.push(`${pend} encuentro(s) pendientes de revisión.`);
   const act = d.participants.filter((p) => p.active && p.compites);
-  if (act.length !== 30) out.push(`Hay ${act.length} participantes activos que compiten (deberían ser 30).`);
-  if (act.some((p) => p.is_placeholder)) out.push('Falta poner nombre al participante nº30 (pestaña Participantes).');
+  if (act.some((p) => p.is_placeholder)) out.push('Hay un participante provisional sin nombre (pestaña Participantes).');
   const vistos = new Map();
   for (const p of d.participants) { const k = norm(p.display_name); if (vistos.has(k)) out.push(`Nombres casi iguales: «${vistos.get(k)}» y «${p.display_name}».`); else vistos.set(k, p.display_name); }
   return out.length ? `<ul class="avisos">${out.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
@@ -124,8 +123,8 @@ function tabGente() {
   const gente = ordenar(S.data.participants), act = gente.filter((p) => p.active && p.compites).length;
   return `<p class="nota">${act} activos que compiten, de ${gente.filter((p) => p.compites).length}. Cada uno tiene ${Math.max(0, act - 1)} encuentros posibles. Los profes (en cursiva) no compiten.</p>
     ${gente.map((p) => `<form class="adm-item ${p.is_placeholder ? 'prov' : ''} ${p.active ? '' : 'inactivo'}" data-submit="adm-p-guardar" data-id="${p.id}">
-      ${p.is_placeholder ? '<p class="error">Provisional: escribe aquí el nombre real del nº30 y guarda.</p>' : ''}
-      <input type="text" name="nombre" value="${esc(p.is_placeholder ? '' : p.display_name)}" placeholder="${p.is_placeholder ? 'Nombre del participante nº30' : ''}" maxlength="40" required autocomplete="off" class="${p.compites ? '' : 'cursiva'}">
+      ${p.is_placeholder ? '<p class="error">Provisional: escribe el nombre real y guarda, o bórralo.</p>' : ''}
+      <input type="text" name="nombre" value="${esc(p.is_placeholder ? '' : p.display_name)}" placeholder="${p.is_placeholder ? 'Nombre real' : ''}" maxlength="40" required autocomplete="off" class="${p.compites ? '' : 'cursiva'}">
       <div class="adm-bot">
       <label class="chk-inline"><input type="checkbox" data-act="adm-p-compite" data-id="${p.id}" ${p.compites ? 'checked' : ''}> Compite</label>
       <button class="btn btn-mini">Guardar</button>
@@ -154,7 +153,7 @@ function tabAjustes() {
       <p class="nota">${s.moderation_enabled ? 'Activada: los encuentros nuevos quedan ocultos hasta que los apruebes.' : 'Desactivada: los encuentros se publican al instante (recomendado).'}</p>
       <button class="btn" data-act="adm-moderacion">${s.moderation_enabled ? 'Desactivar moderación previa' : 'Activar moderación previa'}</button></div>
     ${backend.modo === 'demo' ? `<div class="form"><h2 class="h2">Demo</h2><button class="btn" data-act="demo-sembrar">Rellenar con encuentros de ejemplo</button><button class="btn peligro" data-act="demo-vaciar">Vaciar la demo</button></div>` : ''}
-    <p class="nota">modo ${backend.modo}</p>`;
+    <p class="nota">modo ${backend.modo} · servidor v${esc(S.data.settings.version || '?')}</p>`;
 }
 acts['adm-codigo'] = (f) => { const c = f.codigo.value.trim(); hacer(async () => { await backend.setCode(c); A.enlace = c ? `${location.origin}/?c=${encodeURIComponent(c)}` : ''; }, c ? 'Código cambiado' : 'Código quitado'); };
 acts['adm-copiar'] = async () => { try { await navigator.clipboard.writeText(A.enlace); toast('Copiado'); } catch { toast('Mantén pulsado el enlace para copiarlo'); } };

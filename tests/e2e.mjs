@@ -18,6 +18,8 @@ async function fotoGrande(page, nombre, color) {
 const browser = await chromium.launch();
 process.on('uncaughtException', async (e) => { console.log('FALLO EN', e.message.split('\n')[0]); try { await page.screenshot({ path: path.join(shots, 'fallo.png') }); console.log(await page.locator('main').innerText()); } catch {} process.exit(2); });
 const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+// config.js del repo va en modo real; la prueba usa el modo demo (sin backend).
+await ctx.route('**/config.js', (r) => r.fulfill({ contentType: 'application/javascript', body: 'window.RETO29_CONFIG = { MODO: "demo" };' }));
 const page = await ctx.newPage();
 const errores = []; page.on('pageerror', (e) => errores.push(e.message)); page.on('console', (m) => { if (m.type() === 'error' && !/fonts\.g|ERR_|Failed to load resource/.test(m.text())) errores.push(m.text()); });
 const txt = (s) => page.locator(s).first().innerText();
@@ -29,25 +31,29 @@ await page.goto(URL_); await page.waitForSelector('input[name=codigo]');
 await page.fill('input[name=codigo]', 'malo'); await page.click('button.cta'); await page.waitForSelector('.error');
 ok(true, 'código incorrecto rechazado');
 await page.fill('input[name=codigo]', 'DEMO '); await page.click('button.cta'); await page.waitForSelector('.grid-nombres');
-ok((await page.locator('.nombre').count()) === 30, '30 participantes que compiten en "¿Quién eres?" (los profes no aparecen ahí)');
-ok((await page.locator('.nombre.prov').count()) === 1, 'el nº30 aparece como provisional');
+ok((await page.locator('.nombre').count()) === 33, '"¿Quién eres?": 30 alumnos (con Julia de la T.) + 3 profes');
+ok((await page.locator('.nombre.cursiva').count()) === 3, 'Cou, Feña y Gala aparecen, en cursiva');
+ok((await page.locator('.nombre.prov').count()) === 0, 'ya no aparece el nº30 provisional');
 await page.locator('.nombre', { hasText: /^Ancho$/ }).click(); await page.waitForSelector('.prog');
 ok((await txt('.prog-n')).replace(/\s+/g, '') === '0/29', 'progreso inicial 0/29');
 
 console.log('2) Foto de GRUPO: Ancho + Serginho + Roti cubre las 3 parejas de golpe');
 const f1 = await fotoGrande(page, '_foto1.jpg', '#884422');
-await page.click('a.cta'); await page.waitForSelector('select[data-ch="nuevo-b"]');
+await page.click('a.cta'); await page.waitForSelector('.chips');
 ok(await page.locator('button.cta').isDisabled(), 'guardar deshabilitado sin datos');
-await page.selectOption('select[data-ch="nuevo-b"]', { label: 'Serginho' });
-await page.click('[data-act="nuevo-mas-tog"]'); await page.waitForSelector('.mas-lista');
-await page.locator('.mas-lista .chk', { hasText: 'Roti' }).locator('input').check();
+ok((await page.locator('.chips .chip[data-nombre="Julia de la T."]').count()) === 1, 'Julia de la T. está en "¿Con quién?"');
+ok((await page.locator('.chips .chip').filter({ hasText: 'Nº 30' }).count()) === 0, 'no hay rastro del nº30 en "¿Con quién?"');
+await page.click('.chips .chip[data-nombre="Serginho"]');
+await page.click('.chips .chip[data-nombre="Roti"]');
 await (await foto()).setInputFiles(f1); await page.waitForSelector('.foto-prev img');
 await page.fill('[data-in="nuevo-lugar"]', 'Praza da Quintana');
+ok((await page.locator('.chips .chip.on').count()) === 2, 'dos personas marcadas a la vez en la rejilla (Serginho y Roti)');
+ok((await txt('.resumen')).includes('Cuenta para los 3'), `el resumen avisa de a quién suma: "${(await txt('.resumen')).trim()}"`);
 await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 await page.waitForSelector('.det-foto img');
 ok((await txt('.det-n')).includes('Ancho') && (await txt('.det-n')).includes('Serginho') && (await txt('.det-n')).includes('Roti'), 'el detalle muestra a los 3');
 const dim = await page.evaluate(async () => { const i = document.querySelector('.det-foto img'); await i.decode(); const r = await fetch(i.src); const b = await r.blob(); return { w: i.naturalWidth, h: i.naturalHeight, kb: Math.round(b.size / 1024), type: b.type }; });
-ok(Math.max(dim.w, dim.h) === 1600 && dim.type === 'image/jpeg', `foto comprimida a ${dim.w}×${dim.h}, ${dim.kb} KB`);
+ok(Math.max(dim.w, dim.h) === 1440 && dim.type === 'image/jpeg' && dim.kb < 450, `foto comprimida a ${dim.w}×${dim.h}, ${dim.kb} KB`);
 await page.click('[data-act=atras]'); await page.waitForSelector('.prog');
 ok((await txt('.prog-n')).replace(/\s+/g, '') === '2/29', 'Ancho pasa a 2/29 (Serginho Y Roti) con UNA sola foto');
 await page.screenshot({ path: path.join(shots, '01_grupo.png') });
@@ -63,26 +69,26 @@ ok((await page.locator('.tile.hecho').count()) === 2, 'Mi reto de Serginho: 2 ca
 
 console.log('4) Repetir el MISMO grupo exacto → foto extra, no duplica');
 await page.goto(URL_ + '/quien'); await page.locator('.nombre', { hasText: /^Ancho$/ }).click();
-await page.goto(URL_ + '/nuevo'); await page.selectOption('select[data-ch="nuevo-b"]', { label: 'Serginho' });
-await page.click('[data-act="nuevo-mas-tog"]'); await page.locator('.mas-lista .chk', { hasText: 'Roti' }).locator('input').check();
+await page.goto(URL_ + '/nuevo'); await page.waitForSelector('.chips'); await page.click('.chips .chip[data-nombre="Serginho"]');
+await page.click('.chips .chip[data-nombre="Roti"]');
 await page.waitForSelector('.aviso'); ok(true, 'avisa de que ya existe ese grupo exacto');
 await (await foto()).setInputFiles(f1); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 ok((await page.locator('.det-foto').count()) === 2, 'la 2ª foto se añade al MISMO encuentro (foto extra)');
 await page.goto(URL_); await page.waitForSelector('.prog'); ok((await txt('.prog-n')).replace(/\s+/g, '') === '2/29', 'el progreso no cambia con la foto extra');
 
 console.log('5) Foto con un profe: no cuenta para el reto, pero se guarda y se ve en cursiva');
-await page.goto(URL_ + '/nuevo'); await page.waitForSelector('select[data-ch="nuevo-b"]');
-const opts = await page.locator('select[data-ch="nuevo-b"] option').allInnerTexts();
+await page.goto(URL_ + '/nuevo'); await page.waitForSelector('.chips');
+const opts = await page.locator('.chips .chip.cursiva').allInnerTexts();
 ok(opts.some((t) => t.includes('Cou')) && opts.some((t) => t.includes('Feña')) && opts.some((t) => t.includes('Gala')), 'Cou, Feña y Gala aparecen como opción para "me encontré con"');
-await page.selectOption('select[data-ch="nuevo-b"]', { label: 'Cou' });
+await page.click('.chips .chip[data-nombre="Cou"]');
 const f2 = await fotoGrande(page, '_foto2.jpg', '#227744');
 await (await foto()).setInputFiles(f2); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 const cursivaCount = await page.locator('.det-n i').count(); ok(cursivaCount >= 1, 'el nombre del profe sale en cursiva en el detalle');
-await page.goto(URL_); await page.waitForSelector('.prog'); ok((await txt('.prog-n')).replace(/\s+/g, '') === '2/29', 'la foto con el profe NO suma al 29');
+await page.goto(URL_); await page.waitForSelector('.prog'); ok((await txt('.prog-n')).replace(/\s+/g, '') === '2/29', 'la foto con el profe NO suma al reto');
 
 console.log('6) Hasta 5 fotos extra en el mismo encuentro, la 6ª no');
 await page.goto(URL_ + '/quien'); await page.locator('.nombre', { hasText: /^Ari$/ }).click();
-await page.goto(URL_ + '/nuevo'); await page.selectOption('select[data-ch="nuevo-b"]', { label: 'Carlos' });
+await page.goto(URL_ + '/nuevo'); await page.waitForSelector('.chips'); await page.click('.chips .chip[data-nombre="Carlos"]');
 const fx = await fotoGrande(page, '_fotoAC.jpg', '#552299');
 await (await foto()).setInputFiles(fx); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 const urlAC = page.url();
@@ -92,10 +98,9 @@ ok((await page.locator('[data-act="mostrar-mas-foto"]').count()) === 0, 'con 5 e
 
 console.log('6b) Foto extra en un encuentro de GRUPO no pierde a nadie (el bug que se corrigió)');
 await page.goto(URL_ + '/quien'); await page.locator('.nombre', { hasText: /^Ancho$/ }).click(); await page.waitForSelector('.prog');
-await page.goto(URL_ + '/nuevo'); await page.waitForSelector('select[data-ch="nuevo-b"]');
-await page.selectOption('select[data-ch="nuevo-b"]', { label: 'Fabián' });
-await page.click('[data-act="nuevo-mas-tog"]'); await page.waitForSelector('.mas-lista');
-await page.locator('.mas-lista .chk', { hasText: 'Harold' }).locator('input').check();
+await page.goto(URL_ + '/nuevo'); await page.waitForSelector('.chips');
+await page.click('.chips .chip[data-nombre="Fabián"]');
+await page.click('.chips .chip[data-nombre="Harold"]');
 const fg = await fotoGrande(page, '_fotoGrupo3.jpg', '#119933');
 await (await foto()).setInputFiles(fg); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
 const urlGrupo3 = page.url();
@@ -106,17 +111,26 @@ ok((await txt('.det-n')).includes('Fabián') && (await txt('.det-n')).includes('
 await page.goto(URL_ + '/matriz'); await page.waitForSelector('.mx');
 ok((await page.locator('.c.on').count()) === 14, 'matriz: 14 casillas (7 parejas × 2: el trío de Ancho, el trío nuevo y Ari-Carlos) — no se ha creado ningún encuentro redundante');
 
+console.log('6c) Entrar como profe (Gala): sin contador, puede subir fotos, no suma a nadie');
+await page.goto(URL_ + '/quien'); await page.locator('.nombre', { hasText: /^Gala$/ }).click(); await page.waitForSelector('.prog');
+ok((await txt('.prog-t')).includes('Profe'), 'Inicio de un profe: "Profe · no compites" en vez de X/29');
+await page.goto(URL_ + '/nuevo'); await page.waitForSelector('select[data-ch="nuevo-a"]');
+ok((await page.locator('select[data-ch="nuevo-a"]').inputValue()) !== '' && (await page.locator('select[data-ch="nuevo-a"] option:checked').innerText()).startsWith('Gala'), '"Soy" viene preseleccionado con Gala');
+await page.click('.chips .chip[data-nombre="Pedro"]');
+await (await foto()).setInputFiles(fx); await page.waitForSelector('.foto-prev img'); await page.click('button.cta'); await page.waitForURL(/\/encuentro\//);
+await page.goto(URL_ + '/mi-reto'); await page.waitForSelector('main');
+ok((await page.locator('.tile.hecho').count()) >= 1, '"Mis fotos" del profe muestra la foto con Pedro');
+await page.goto(URL_ + '/quien'); await page.locator('.nombre', { hasText: /^Pedro$/ }).click(); await page.waitForSelector('.prog');
+ok((await txt('.prog-n')).replace(/\s+/g, '') === '0/29', 'la foto Gala + Pedro no suma a Pedro');
+
 console.log('7) Un visitante normal no puede administrar');
 ok((await page.locator('[data-act^="adm-"]').count()) === 0, 'sin botones de edición/borrado para visitantes');
 
-console.log('8) Admin: nombrar al nº30, quitar a alguien de una foto de grupo, borrar');
+console.log('8) Admin: quitar a alguien de una foto de grupo, borrar');
 await page.goto(URL_ + '/admin'); await page.fill('input[name=password]', 'mala'); await page.click('button.cta'); await page.waitForSelector('.error');
 ok(true, 'contraseña incorrecta rechazada');
 await page.fill('input[name=password]', 'demo'); await page.click('button.cta'); await page.waitForSelector('.tabs');
-ok((await txt('.avisos')).includes('nº30'), 'el panel avisa de que falta el nombre del nº30');
 await page.screenshot({ path: path.join(shots, '02_admin.png'), fullPage: true });
-await page.click('[data-t=gente]'); await page.fill('.adm-item.prov input[name=nombre]', 'NombreReal'); await page.click('.adm-item.prov button.btn'); await page.waitForFunction(() => !document.querySelector('.adm-item.prov'));
-ok(true, 'placeholder nº30 renombrado desde admin');
 await page.click('[data-t=enc]'); await page.locator('.adm-fila', { hasText: 'Roti' }).locator('a.btn').click(); await page.waitForSelector('.mas-lista');
 ok((await page.locator('.mas-lista .chk input:checked').count()) === 3, 'editar: las 3 personas del grupo salen marcadas');
 await page.locator('.mas-lista .chk', { hasText: 'Roti' }).locator('input').uncheck();

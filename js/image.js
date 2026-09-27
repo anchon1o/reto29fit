@@ -5,7 +5,7 @@ import { err } from './util.js';
 // La foto viaja al servidor como base64 dentro de un JSON (más simple y fiable en móvil que subidas
 // multipart en dos pasos). Por eso el límite de salida es más estricto que si fuera binario directo:
 // base64 pesa ~1.33×, y hay que dejar margen bajo el límite de payload de la función serverless.
-const LADO_FOTO = 1600, LADO_MINI = 400, MAX_ENTRADA = 60 * 1024 * 1024, MAX_SALIDA = 1.5 * 1024 * 1024;
+const LADO_FOTO = 1440, LADO_MINI = 360, MAX_ENTRADA = 60 * 1024 * 1024, MAX_SALIDA = 1.5 * 1024 * 1024;
 
 function cargar(file) {
   return new Promise((ok, ko) => {
@@ -41,10 +41,10 @@ export async function prepararFoto(file) {
   const { img, url } = await cargar(file);
   try {
     if (!img.naturalWidth) throw err('FORMATO', 'No se pudo leer la imagen.');
-    let photo = await escalar(img, LADO_FOTO, 0.82);
+    let photo = await escalar(img, LADO_FOTO, 0.8);
     if (photo.size > MAX_SALIDA) photo = await escalar(img, 1280, 0.68);
     if (photo.size > MAX_SALIDA) photo = await escalar(img, 1000, 0.6);      // foto muy detallada (mucho ruido): último intento
-    const thumb = await escalar(img, LADO_MINI, 0.72);
+    const thumb = await escalar(img, LADO_MINI, 0.7);
     return { photo, thumb, preview: URL.createObjectURL(thumb) };
   } finally { URL.revokeObjectURL(url); }
 }

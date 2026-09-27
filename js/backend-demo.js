@@ -2,8 +2,8 @@
 // Sirve para probar la web sin desplegar nada. Código: "demo". Admin: cualquier email + "demo".
 import { err, uuid, pairKey, kv } from './util.js';
 
-const K = 'reto29_demo_v2';
-const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
+const K = 'reto29_demo_v4';
+const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Julia de la T.','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
 const PROFES = [['Cou', 'profesor'], ['Feña', 'profesor'], ['Gala', 'profesora']];   // no compiten: no cuentan para el 29 ni el ranking
 
 function nuevo() {
@@ -12,7 +12,6 @@ function nuevo() {
     settings: { title: 'RETO 29 · FIT 2026', moderation_enabled: false, code: 'demo' },
     participants: [
       ...NOMBRES.map((n) => ({ id: uuid(), display_name: n, sort_name: null, active: true, is_placeholder: false, compites: true, created_at: now })),
-      { id: uuid(), display_name: '¿Nº 30?', sort_name: 'zzz', active: true, is_placeholder: true, compites: true, created_at: now },
       ...PROFES.map(([n, c]) => ({ id: uuid(), display_name: n, sort_name: 'zzzz' + n, category: c, active: true, is_placeholder: false, compites: false, created_at: now })),
     ],
     encounters: [], encounter_photos: [], fotos: {},
@@ -44,7 +43,7 @@ export function crearDemo() {
     async getState(code) {
       await espera(); acceso(code);
       const { fotos, settings, ...resto } = db;
-      return JSON.parse(JSON.stringify({ ...resto, settings: { title: settings.title, moderation_enabled: settings.moderation_enabled, code_required: !!settings.code } }));
+      return JSON.parse(JSON.stringify({ ...resto, settings: { title: settings.title, moderation_enabled: settings.moderation_enabled, code_required: !!settings.code, version: 'demo' } }));
     },
     async uploadPhoto(tipo, { photo, thumb }) {
       const id = uuid(); const photo_path = `${tipo}/${id}.jpg`, thumb_path = `${tipo}/${id}_t.jpg`;

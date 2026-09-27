@@ -2,16 +2,20 @@
 // Modelo: un "encuentro" es UNA FOTO con un grupo de participantes (2 o más). Cubre todas las parejas de ese grupo a la vez.
 import crypto from 'node:crypto';
 
-const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
+const NOMBRES = ['Alan','Ancho','Ari','Carlos','Dani Dan','Dani M','Egoitz','Emilia','Fabián','Fernanda','Harold','Jenny','Juli','Julia de la T.','Lucía','Luís','MA','Manu','Marilú','Pedro','Raquel','Raúl','Renato','Ritxi','Rocío E','Roti','Samuel','Serginho','Tita','Xana'];
 export const SEMILLA = {
   participantes: [
     ...NOMBRES.map((n) => ({ display_name: n, sort_name: null, is_placeholder: false, compites: true })),
-    { display_name: '¿Nº 30?', sort_name: 'zzz', is_placeholder: true, compites: true },     // nº30 PROVISIONAL: se renombra en /admin
     { display_name: 'Cou', sort_name: 'zzzzCou', is_placeholder: false, compites: false },    // profes: no compiten (van en cursiva)
     { display_name: 'Feña', sort_name: 'zzzzFeña', is_placeholder: false, compites: false },
     { display_name: 'Gala', sort_name: 'zzzzGala', is_placeholder: false, compites: false },
   ],
 };
+
+// Código de acceso del reto al crear la base de datos. Se comparte por WhatsApp, así que no es secreto.
+// Después se cambia desde /admin → Ajustes. No distingue mayúsculas.
+export const VERSION = '8';          // se muestra al pie de «¿Quién eres?» para saber qué hay desplegado
+export const CODIGO_POR_DEFECTO = 'Fitiñas26';
 
 export const hashCodigo = (c) => crypto.createHash('sha256').update(String(c ?? '').trim().toLowerCase(), 'utf8').digest('hex');
 const fallo = (code, status = 400) => Object.assign(new Error(code), { code, status });
@@ -44,7 +48,7 @@ export function crearLogica({ db, blobs, env }) {
   }
 
   let listo;
-  const preparar = () => (listo ||= db.init({ semilla: SEMILLA, hashInicial: env.CODIGO_RETO ? hashCodigo(env.CODIGO_RETO) : null }).catch((e) => { listo = null; throw e; }));
+  const preparar = () => (listo ||= db.init({ semilla: SEMILLA, hashInicial: hashCodigo(env.CODIGO_RETO || CODIGO_POR_DEFECTO) }).catch((e) => { listo = null; throw e; }));
 
   async function exigirAcceso(ctx) {
     if (ctx.admin) return;
@@ -67,12 +71,12 @@ export function crearLogica({ db, blobs, env }) {
   }
 
   const fns = {
-    async access_info() { const s = await db.settings(); return { code_required: !!s.challenge_code_hash, title: s.title }; },
+    async access_info() { const s = await db.settings(); return { code_required: !!s.challenge_code_hash, title: s.title, version: VERSION }; },
 
     async get_state(_a, ctx) {
       await exigirAcceso(ctx);
       const [s, d] = await Promise.all([db.settings(), db.estado(ctx.admin)]);
-      return { settings: { title: s.title, moderation_enabled: s.moderation_enabled, code_required: !!s.challenge_code_hash }, ...d };
+      return { settings: { title: s.title, moderation_enabled: s.moderation_enabled, code_required: !!s.challenge_code_hash, version: VERSION }, ...d };
     },
 
     async upload(a, ctx) {                            // foto + miniatura en una sola petición
@@ -111,6 +115,7 @@ export function crearLogica({ db, blobs, env }) {
     // ---------------- admin ----------------
     async login(a) {
       if (pass().length < 8) throw fallo('ADMIN_NO_CONFIGURADO', 503);
+      if (hashCodigo(pass()) === (await db.settings()).challenge_code_hash) throw fallo('ADMIN_IGUAL_CODIGO', 503);   // si no, todo el grupo sería admin
       const x = crypto.createHash('sha256').update(String(a.password ?? '')).digest(), y = crypto.createHash('sha256').update(pass()).digest();
       if (!crypto.timingSafeEqual(x, y)) { await dormir(600); throw fallo('LOGIN', 401); }
       return { token: crearToken() };

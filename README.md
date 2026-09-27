@@ -58,15 +58,18 @@ el ranking ni en "¿Quién eres?", y su nombre se muestra siempre **en cursiva**
    con **Storage → Create → Blob** — añade sola `BLOB_READ_WRITE_TOKEN`.
 3. **Settings → Environment Variables**, añade:
    - `ADMIN_PASSWORD`: la contraseña de administración (mínimo 8 caracteres).
-   - `CODIGO_RETO`: el código que se compartirá por WhatsApp (opcional; sin él, entrada libre).
+   - `ADMIN_PASSWORD` **tiene que ser distinta del código del reto**: si fueran iguales, cualquiera con el
+     código sería admin, así que el panel se niega a abrir en ese caso.
+   - El código de acceso es **`Fitiñas26`** por defecto (no distingue mayúsculas; la ñ sí cuenta). Solo
+     hace falta `CODIGO_RETO` si quieres otro al crear la base de datos; después se cambia en /admin → Ajustes.
 4. Despliega. En el primer `get_state` la función crea las tablas y siembra los 29 + «¿Nº 30?» + Cou,
    Feña y Gala automáticamente (ver `SEMILLA` en `api/_lib/logica.js`).
 5. Enlace para compartir: `https://TU-DOMINIO/?c=TU-CODIGO` (entra sin teclear nada). Desde
    `/admin → Ajustes` se puede cambiar el código más adelante.
 6. Cuando se sepa el nombre del nº30: `/admin → Participantes` → la ficha «Provisional» → nombre → Guardar.
 
-`config.js` solo se usa para el **modo demo** (`MODO: "demo"`). Para el despliegue real, bórralo o pon
-`MODO: "real"`: el frontend habla directamente con `/api/reto29` en el mismo dominio.
+`config.js` ya viene en **`MODO: "real"`**: el frontend habla con `/api/reto29` en el mismo dominio. Pon
+`"demo"` solo para probar sin backend.
 
 ## Qué se ha probado y qué no
 Cuatro baterías, las cuatro en verde:
@@ -86,6 +89,10 @@ Cuatro baterías, las cuatro en verde:
 4. **`tests/bundle.mjs`** — el HTML único (`dist/reto29-demo.html`) dentro de un iframe aislado con
    `localStorage` bloqueado (como una vista previa incrustada), para comprobar que no se rompe sin
    almacenamiento persistente.
+
+Además, **`tests/real.mjs`** recorre el **modo real** de punta a punta contra `tests/servidor-real-local.mjs`
+(la API de verdad, con la base de datos en memoria): entrar con `fitiñas26`, elegir a Julia de la T.,
+subir una foto, recargar y ver que el 1/29 se guardó en el servidor, y verlo desde /admin.
 
 Ejecutar todo: `tests/run.sh` (arranca `dev_server.py`, corre `e2e.mjs`, para el servidor).
 
